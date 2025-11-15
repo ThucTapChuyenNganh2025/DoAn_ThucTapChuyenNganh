@@ -8,7 +8,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
-        /* GIỮ NGUYÊN CSS NHƯ TRANG DUYỆT TIN ĐỂ ĐỒNG BỘ */
         body { background-color: #f4f6f9; font-family: 'Segoe UI', sans-serif; }
         
         .sidebar {
@@ -22,7 +21,6 @@
         .sidebar a:hover {
             background-color: #495057; color: #ff9f43; border-left: 4px solid #ff9f43;
         }
-        /* Class active này để đánh dấu mình đang ở trang Kho Sản Phẩm */
         .sidebar a.active {
             background-color: #495057; color: white; border-left: 4px solid #ff9f43;
         }
@@ -31,11 +29,10 @@
         }
         .main-content { margin-left: 250px; padding: 30px; }
         
-        /* Hộp viền cam */
         .card-custom {
             background: white; border: none; border-radius: 8px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            border-top: 5px solid #ff9f43; /* Viền cam thương hiệu */
+            border-top: 5px solid #ff9f43;
         }
         .table thead { background-color: #343a40; color: white; }
     </style>
@@ -46,15 +43,16 @@
     <div class="brand"><i class="fa-solid fa-shop"></i> CHỢ ADMIN</div>
     <a href="admin_duyettin.php"><i class="fa-solid fa-check-double me-2"></i> Duyệt Tin Mới</a>
     <a href="admin_sanpham.php" class="active"><i class="fa-solid fa-box-open me-2"></i> Kho Sản Phẩm</a>
-    <a href="#"><i class="fa-solid fa-users me-2"></i> Quản Lý User</a>
+    <a href="admin_users.php"><i class="fa-solid fa-users me-2"></i> Quản Lý User</a>
     <a href="#"><i class="fa-solid fa-right-from-bracket me-2"></i> Đăng Xuất</a>
 </div>
 
 <div class="main-content">
-    
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h3 class="text-secondary">Quản Lý Sản Phẩm</h3>
-        <button class="btn btn-warning text-white shadow-sm"><i class="fa-solid fa-plus"></i> Thêm Mới (Demo)</button>
+        <a href="admin_them_sanpham.php" class="btn btn-warning text-white shadow-sm">
+            <i class="fa-solid fa-plus"></i> Thêm Mới
+        </a>
     </div>
 
     <div class="card card-custom p-4">
@@ -75,17 +73,16 @@
                 <?php
                 include 'connect.php';
                 
-                // Lấy tất cả sản phẩm, sắp xếp mới nhất lên đầu
+                // SỬA 1: Đổi ORDER BY DESC thành ASC (Tăng dần: 1, 2, 3...)
                 $sql = "SELECT products.*, users.name as seller_name 
                         FROM products 
                         JOIN users ON products.seller_id = users.id 
-                        ORDER BY products.id DESC";
+                        ORDER BY products.id ASC";
                 
                 $result = $conn->query($sql);
 
-                if ($result->num_rows > 0) {
+                if ($result && $result->num_rows > 0) {
                     while($row = $result->fetch_assoc()) {
-                        // Xử lý màu sắc trạng thái
                         $statusBadge = '';
                         if($row['status'] == 'approved') {
                             $statusBadge = '<span class="badge bg-success"><i class="fa-solid fa-check"></i> Đã Duyệt</span>';
@@ -93,17 +90,23 @@
                             $statusBadge = '<span class="badge bg-warning text-dark"><i class="fa-solid fa-clock"></i> Chờ Duyệt</span>';
                         } elseif($row['status'] == 'rejected') {
                             $statusBadge = '<span class="badge bg-danger"><i class="fa-solid fa-ban"></i> Từ Chối</span>';
+                        } elseif($row['status'] == 'hidden') {
+                            $statusBadge = '<span class="badge bg-secondary"><i class="fa-solid fa-eye-slash"></i> Đã Ẩn</span>';
                         }
 
                         echo "<tr>";
-                        echo "<td>#" . $row["id"] . "</td>";
+                        
+                        // SỬA 2: Đã bỏ dấu # ở đây
+                        echo "<td>" . $row["id"] . "</td>";
+                        
                         echo "<td class='fw-bold text-primary'>" . $row["title"] . "</td>";
                         echo "<td class='fw-bold'>" . number_format($row["price"]) . " đ</td>";
                         echo "<td>" . $row["seller_name"] . "</td>";
                         echo "<td>" . $statusBadge . "</td>";
+                        
                         echo "<td>
-                                <a href='#' class='btn btn-sm btn-outline-primary'><i class='fa-solid fa-pen'></i> Sửa</a>
-                                <a href='#' class='btn btn-sm btn-outline-danger' onclick='return confirm(\"Bạn muốn xóa tin này?\")'><i class='fa-solid fa-trash'></i> Xóa</a>
+                                <a href='admin_sua_sanpham.php?id=" . $row["id"] . "' class='btn btn-sm btn-outline-primary'><i class='fa-solid fa-pen'></i> Sửa</a>
+                                <a href='xuly_xoa_sanpham.php?id=" . $row["id"] . "' class='btn btn-sm btn-outline-danger' onclick='return confirm(\"Bạn chắc chắn muốn xóa sản phẩm này?\")'><i class='fa-solid fa-trash'></i> Xóa</a>
                               </td>";
                         echo "</tr>";
                     }
