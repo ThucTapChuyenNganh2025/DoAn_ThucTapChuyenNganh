@@ -71,7 +71,7 @@
             </thead>
             <tbody>
                 <?php
-                include 'connect.php';
+                include '../config/connect.php';
                 
                 // SỬA 1: Đổi ORDER BY DESC thành ASC (Tăng dần: 1, 2, 3...)
                 $sql = "SELECT products.*, users.name as seller_name 

@@ -8,7 +8,7 @@
 <body class="bg-light">
 
 <?php
-include 'connect.php';
+include '../config/connect.php';
 
 // 1. LẤY DỮ LIỆU CŨ ĐỂ HIỆN LÊN FORM
 if (isset($_GET['id'])) {

@@ -62,7 +62,7 @@
 <div class="main-content">
     
     <?php
-        include 'connect.php';
+        include '../config/connect.php';
         
         // Nếu database trống, các hàm count có thể trả về null, nên dùng (int) để ép về 0
         $q1 = $conn->query("SELECT COUNT(*) as total FROM users");

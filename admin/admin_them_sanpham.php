@@ -8,7 +8,7 @@
 <body class="bg-light">
 
 <?php
-include 'connect.php';
+include '../config/connect.php';
 
 // 1. XỬ LÝ KHI BẤM NÚT "THÊM MỚI"
 if (isset($_POST['btn_them'])) {
