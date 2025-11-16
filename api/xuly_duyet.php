@@ -1,5 +1,5 @@
 <?php
-include 'connect.php';
+include '../config/connect.php';
 
 // Lấy ID và Hành động từ đường link (URL)
 if (isset($_GET['id']) && isset($_GET['action'])) {
@@ -20,7 +20,7 @@ if (isset($_GET['id']) && isset($_GET['action'])) {
         
         if ($conn->query($sql) === TRUE) {
             // Cập nhật xong thì quay lại trang danh sách
-            header("Location: admin_duyettin.php");
+            header("Location: ../admin/admin_duyettin.php");
         } else {
             echo "Lỗi: " . $conn->error;
         }
