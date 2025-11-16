@@ -118,7 +118,7 @@ $approved = $conn->query("SELECT COUNT(*) as c FROM products WHERE seller_id = $
             </thead>
             <tbody>
                 <?php
-                // Query lấy tin mới nhất, LƯU Ý: đã có cột image
+                // Query lấy tin mới nhất
                 $sql = "SELECT * FROM products WHERE seller_id = $my_id ORDER BY id DESC LIMIT 5";
                 $result = $conn->query($sql);
 
@@ -127,7 +127,7 @@ $approved = $conn->query("SELECT COUNT(*) as c FROM products WHERE seller_id = $
                         $stt = $row['status'] == 'pending' ? '<span class="badge bg-warning text-dark">Chờ duyệt</span>' : 
                                ($row['status'] == 'approved' ? '<span class="badge bg-success">Đã duyệt</span>' : '<span class="badge bg-danger">Từ chối</span>');
                         
-                        // Xử lý ảnh: Nếu null thì dùng ảnh giả
+                        // Xử lý ảnh
                         $img_url = !empty($row['image']) ? '../' . $row['image'] : 'https://via.placeholder.com/50';
 
                         echo "<tr>";
@@ -136,8 +136,13 @@ $approved = $conn->query("SELECT COUNT(*) as c FROM products WHERE seller_id = $
                         echo "<td class='text-danger'>" . number_format($row['price']) . " đ</td>";
                         echo "<td>$stt</td>";
                         echo "<td>
-                                <a href='#' class='btn btn-sm btn-outline-primary'><i class='fa-solid fa-pen'></i></a>
-                                <a href='#' class='btn btn-sm btn-outline-danger'><i class='fa-solid fa-trash'></i></a>
+                                <a href='user_sua_tin.php?id=" . $row['id'] . "' class='btn btn-sm btn-outline-primary'><i class='fa-solid fa-pen'></i> Sửa</a>
+                                
+                                <a href='xuly_xoa_tin.php?id=" . $row['id'] . "' 
+                                   class='btn btn-sm btn-outline-danger'
+                                   onclick='return confirm(\"Bạn có chắc chắn muốn xóa tin này không?\")'>
+                                   <i class='fa-solid fa-trash'></i> Xóa
+                                </a>
                               </td>";
                         echo "</tr>";
                     }

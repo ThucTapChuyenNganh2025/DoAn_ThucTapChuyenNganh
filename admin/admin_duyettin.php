@@ -155,7 +155,7 @@
                         echo "<td><span class='badge bg-warning text-dark rounded-pill'>Pending</span></td>";
                         echo "<td>
                                 <a href='../api/xuly_duyet.php?id=" . $row["id"] . "&action=approve' class='btn btn-sm btn-success shadow-sm'><i class='fa-solid fa-check'></i></a>
-                                <a href='xuly_duyet.php?id=" . $row["id"] . "&action=reject' class='btn btn-sm btn-danger shadow-sm'><i class='fa-solid fa-trash'></i></a>
+                                <a href='../api/xuly_duyet.php?id=" . $row["id"] . "&action=reject' class='btn btn-sm btn-danger shadow-sm'><i class='fa-solid fa-trash'></i></a>
                               </td>";
                         echo "</tr>";
                     }

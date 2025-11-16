@@ -71,9 +71,10 @@
             </thead>
             <tbody>
                 <?php
+                // Kết nối CSDL (Ra ngoài 1 cấp -> vào config)
                 include '../config/connect.php';
                 
-                // SỬA 1: Đổi ORDER BY DESC thành ASC (Tăng dần: 1, 2, 3...)
+                // Lấy dữ liệu sắp xếp theo ID tăng dần (1, 2, 3...)
                 $sql = "SELECT products.*, users.name as seller_name 
                         FROM products 
                         JOIN users ON products.seller_id = users.id 
@@ -83,6 +84,7 @@
 
                 if ($result && $result->num_rows > 0) {
                     while($row = $result->fetch_assoc()) {
+                        // Xử lý màu sắc trạng thái
                         $statusBadge = '';
                         if($row['status'] == 'approved') {
                             $statusBadge = '<span class="badge bg-success"><i class="fa-solid fa-check"></i> Đã Duyệt</span>';
@@ -96,18 +98,31 @@
 
                         echo "<tr>";
                         
-                        // SỬA 2: Đã bỏ dấu # ở đây
+                        // Cột ID
                         echo "<td>" . $row["id"] . "</td>";
                         
+                        // Cột Tên
                         echo "<td class='fw-bold text-primary'>" . $row["title"] . "</td>";
+                        
+                        // Cột Giá
                         echo "<td class='fw-bold'>" . number_format($row["price"]) . " đ</td>";
+                        
+                        // Cột Người bán
                         echo "<td>" . $row["seller_name"] . "</td>";
+                        
+                        // Cột Trạng thái
                         echo "<td>" . $statusBadge . "</td>";
                         
+                        // Cột Hành động (Đã sửa lỗi cú pháp và đường dẫn tại đây)
                         echo "<td>
-                                <a href='admin_sua_sanpham.php?id=" . $row["id"] . "' class='btn btn-sm btn-outline-primary'><i class='fa-solid fa-pen'></i> Sửa</a>
-                                <a href='xuly_xoa_sanpham.php?id=" . $row["id"] . "' class='btn btn-sm btn-outline-danger' onclick='return confirm(\"Bạn chắc chắn muốn xóa sản phẩm này?\")'><i class='fa-solid fa-trash'></i> Xóa</a>
+                                <a href='admin_sua_sanpham.php?id=" . $row["id"] . "' class='btn btn-sm btn-outline-primary'>
+                                    <i class='fa-solid fa-pen'></i> Sửa
+                                </a>
+                                <a href='../api/xuly_xoa_sanpham.php?id=" . $row["id"] . "' class='btn btn-sm btn-outline-danger' onclick='return confirm(\"Bạn chắc chắn muốn xóa sản phẩm này?\")'>
+                                    <i class='fa-solid fa-trash'></i> Xóa
+                                </a>
                               </td>";
+                        
                         echo "</tr>";
                     }
                 } else {

@@ -1,5 +1,5 @@
 <?php
-include 'connect.php';
+include '../config/connect.php';
 
 if (isset($_GET['id'])) {
     $id = $_GET['id'];
@@ -13,7 +13,7 @@ if (isset($_GET['id'])) {
     $sql = "DELETE FROM users WHERE id = $id";
 
     if ($conn->query($sql) === TRUE) {
-        header("Location: admin_users.php");
+        header("Location: ../admin/admin_users.php");
     } else {
         echo "Lỗi: " . $conn->error;
     }
