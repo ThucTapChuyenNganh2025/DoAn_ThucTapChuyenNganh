@@ -71,63 +71,65 @@
             </thead>
             <tbody>
                 <?php
-                // Kết nối CSDL (Ra ngoài 1 cấp -> vào config)
-                include '../config/connect.php';
-                
-                // Lấy dữ liệu sắp xếp theo ID tăng dần (1, 2, 3...)
-                $sql = "SELECT products.*, users.name as seller_name 
-                        FROM products 
-                        JOIN users ON products.seller_id = users.id 
-                        ORDER BY products.id ASC";
-                
-                $result = $conn->query($sql);
+                    include '../config/connect.php';
 
-                if ($result && $result->num_rows > 0) {
-                    while($row = $result->fetch_assoc()) {
-                        // Xử lý màu sắc trạng thái
-                        $statusBadge = '';
-                        if($row['status'] == 'approved') {
-                            $statusBadge = '<span class="badge bg-success"><i class="fa-solid fa-check"></i> Đã Duyệt</span>';
-                        } elseif($row['status'] == 'pending') {
-                            $statusBadge = '<span class="badge bg-warning text-dark"><i class="fa-solid fa-clock"></i> Chờ Duyệt</span>';
-                        } elseif($row['status'] == 'rejected') {
-                            $statusBadge = '<span class="badge bg-danger"><i class="fa-solid fa-ban"></i> Từ Chối</span>';
-                        } elseif($row['status'] == 'hidden') {
-                            $statusBadge = '<span class="badge bg-secondary"><i class="fa-solid fa-eye-slash"></i> Đã Ẩn</span>';
+                    $sql = "SELECT products.*, users.name as seller_name 
+                            FROM products 
+                            JOIN users ON products.seller_id = users.id 
+                            ORDER BY products.id ASC";
+
+                    $result = $conn->query($sql);
+
+                    $stt = 1; // TẠO BIẾN ĐẾM
+
+                    if ($result && $result->num_rows > 0) {
+                        while($row = $result->fetch_assoc()) {
+
+                            // Badge trạng thái
+                            if($row['status'] == 'approved') {
+                                $statusBadge = '<span class="badge bg-success"><i class="fa-solid fa-check"></i> Đã Duyệt</span>';
+                            } elseif($row['status'] == 'pending') {
+                                $statusBadge = '<span class="badge bg-warning text-dark"><i class="fa-solid fa-clock"></i> Chờ Duyệt</span>';
+                            } elseif($row['status'] == 'rejected') {
+                                $statusBadge = '<span class="badge bg-danger"><i class="fa-solid fa-ban"></i> Từ Chối</span>';
+                            } else {
+                                $statusBadge = '<span class="badge bg-secondary"><i class="fa-solid fa-eye-slash"></i> Đã Ẩn</span>';
+                            }
+
+                            echo "<tr>";
+
+                            // ⭐ HIỂN THỊ STT THAY VÌ ID
+                            echo "<td>" . $stt++ . "</td>";
+
+                            // Tên sản phẩm
+                            echo "<td class='fw-bold text-primary'>" . $row["title"] . "</td>";
+
+                            // Giá
+                            echo "<td class='fw-bold'>" . number_format($row["price"]) . " đ</td>";
+
+                            // Người bán
+                            echo "<td>" . $row["seller_name"] . "</td>";
+
+                            // Trạng thái
+                            echo "<td>" . $statusBadge . "</td>";
+
+                            // Hành động
+                            echo "<td>
+                                    <a href='admin_sua_sanpham.php?id=" . $row["id"] . "' class='btn btn-sm btn-outline-primary'>
+                                        <i class='fa-solid fa-pen'></i> Sửa
+                                    </a>
+                                    <a href='../api/xuly_xoa_sanpham.php?id=" . $row["id"] . "' 
+                                        class='btn btn-sm btn-outline-danger'
+                                        onclick='return confirm(\"Bạn chắc chắn muốn xóa sản phẩm này?\")'>
+                                        <i class='fa-solid fa-trash'></i> Xóa
+                                    </a>
+                                </td>";
+
+                            echo "</tr>";
                         }
-
-                        echo "<tr>";
-                        
-                        // Cột ID
-                        echo "<td>" . $row["id"] . "</td>";
-                        
-                        // Cột Tên
-                        echo "<td class='fw-bold text-primary'>" . $row["title"] . "</td>";
-                        
-                        // Cột Giá
-                        echo "<td class='fw-bold'>" . number_format($row["price"]) . " đ</td>";
-                        
-                        // Cột Người bán
-                        echo "<td>" . $row["seller_name"] . "</td>";
-                        
-                        // Cột Trạng thái
-                        echo "<td>" . $statusBadge . "</td>";
-                        
-                        // Cột Hành động (Đã sửa lỗi cú pháp và đường dẫn tại đây)
-                        echo "<td>
-                                <a href='admin_sua_sanpham.php?id=" . $row["id"] . "' class='btn btn-sm btn-outline-primary'>
-                                    <i class='fa-solid fa-pen'></i> Sửa
-                                </a>
-                                <a href='../api/xuly_xoa_sanpham.php?id=" . $row["id"] . "' class='btn btn-sm btn-outline-danger' onclick='return confirm(\"Bạn chắc chắn muốn xóa sản phẩm này?\")'>
-                                    <i class='fa-solid fa-trash'></i> Xóa
-                                </a>
-                              </td>";
-                        
-                        echo "</tr>";
+                    } else {
+                        echo "<tr><td colspan='6' class='text-center py-4'>Chưa có sản phẩm nào!</td></tr>";
                     }
-                } else {
-                    echo "<tr><td colspan='6' class='text-center py-4'>Chưa có sản phẩm nào!</td></tr>";
-                }
                 ?>
             </tbody>
         </table>
