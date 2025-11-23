@@ -40,7 +40,7 @@
 <body>
 
 <div class="sidebar">
-    <div class="brand"><i class="fa-solid fa-shop"></i> CHỢ ADMIN</div>
+    <div class="brand"><i class="fa-solid fa-shop"></i> CHỢ ĐIỆN TỬ</div>
     <a href="admin_duyettin.php"><i class="fa-solid fa-check-double me-2"></i> Duyệt Tin Mới</a>
     <a href="admin_sanpham.php" class="active"><i class="fa-solid fa-box-open me-2"></i> Kho Sản Phẩm</a>
     <a href="admin_users.php"><i class="fa-solid fa-users me-2"></i> Quản Lý User</a>
@@ -50,13 +50,31 @@
 <div class="main-content">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h3 class="text-secondary">Quản Lý Sản Phẩm</h3>
-        <a href="admin_them_sanpham.php" class="btn btn-warning text-white shadow-sm">
-            <i class="fa-solid fa-plus"></i> Thêm Mới
-        </a>
+        
+        <div>
+            <?php if(isset($_GET['status'])): ?>
+                <a href="admin_sanpham.php" class="btn btn-secondary text-white shadow-sm me-2">
+                    <i class="fa-solid fa-list"></i> Xem Tất Cả
+                </a>
+            <?php endif; ?>
+
+            <a href="admin_them_sanpham.php" class="btn btn-warning text-white shadow-sm">
+                <i class="fa-solid fa-plus"></i> Thêm Mới
+            </a>
+        </div>
     </div>
 
     <div class="card card-custom p-4">
-        <h4 class="mb-4 text-dark"><i class="fa-solid fa-database text-warning"></i> Tất Cả Sản Phẩm Trong Hệ Thống</h4>
+        <h4 class="mb-4 text-dark">
+            <i class="fa-solid fa-database text-warning"></i> 
+            <?php 
+                if(isset($_GET['status']) && $_GET['status'] == 'approved') {
+                    echo "Danh Sách Sản Phẩm Đang Hiển Thị (Approved)";
+                } else {
+                    echo "Tất Cả Sản Phẩm Trong Hệ Thống";
+                }
+            ?>
+        </h4>
 
         <table class="table table-hover align-middle">
             <thead class="table-dark">
@@ -71,20 +89,26 @@
             </thead>
             <tbody>
                 <?php
-                // Kết nối CSDL (Ra ngoài 1 cấp -> vào config)
-                include '../config/connect.php';
+                // --- SỬA LỖI TẠI ĐÂY: Thêm ../config/ ---
+                include '../config/connect.php'; 
+                // ----------------------------------------
                 
-                // Lấy dữ liệu sắp xếp theo ID tăng dần (1, 2, 3...)
                 $sql = "SELECT products.*, users.name as seller_name 
                         FROM products 
-                        JOIN users ON products.seller_id = users.id 
-                        ORDER BY products.id ASC";
+                        JOIN users ON products.seller_id = users.id";
+
+                // Logic lọc thông minh
+                if(isset($_GET['status'])) {
+                    $status_filter = $_GET['status'];
+                    $sql .= " WHERE products.status = '$status_filter'";
+                }
+
+                $sql .= " ORDER BY products.id ASC";
                 
                 $result = $conn->query($sql);
 
                 if ($result && $result->num_rows > 0) {
                     while($row = $result->fetch_assoc()) {
-                        // Xử lý màu sắc trạng thái
                         $statusBadge = '';
                         if($row['status'] == 'approved') {
                             $statusBadge = '<span class="badge bg-success"><i class="fa-solid fa-check"></i> Đã Duyệt</span>';
@@ -97,36 +121,20 @@
                         }
 
                         echo "<tr>";
-                        
-                        // Cột ID
                         echo "<td>" . $row["id"] . "</td>";
-                        
-                        // Cột Tên
                         echo "<td class='fw-bold text-primary'>" . $row["title"] . "</td>";
-                        
-                        // Cột Giá
                         echo "<td class='fw-bold'>" . number_format($row["price"]) . " đ</td>";
-                        
-                        // Cột Người bán
                         echo "<td>" . $row["seller_name"] . "</td>";
-                        
-                        // Cột Trạng thái
                         echo "<td>" . $statusBadge . "</td>";
                         
-                        // Cột Hành động (Đã sửa lỗi cú pháp và đường dẫn tại đây)
                         echo "<td>
-                                <a href='admin_sua_sanpham.php?id=" . $row["id"] . "' class='btn btn-sm btn-outline-primary'>
-                                    <i class='fa-solid fa-pen'></i> Sửa
-                                </a>
-                                <a href='../api/xuly_xoa_sanpham.php?id=" . $row["id"] . "' class='btn btn-sm btn-outline-danger' onclick='return confirm(\"Bạn chắc chắn muốn xóa sản phẩm này?\")'>
-                                    <i class='fa-solid fa-trash'></i> Xóa
-                                </a>
+                                <a href='admin_sua_sanpham.php?id=" . $row["id"] . "' class='btn btn-sm btn-outline-primary'><i class='fa-solid fa-pen'></i> Sửa</a>
+                                <a href='../api/xuly_xoa_sanpham.php?id=" . $row["id"] . "' class='btn btn-sm btn-outline-danger' onclick='return confirm(\"Bạn chắc chắn muốn xóa sản phẩm này?\")'><i class='fa-solid fa-trash'></i> Xóa</a>
                               </td>";
-                        
                         echo "</tr>";
                     }
                 } else {
-                    echo "<tr><td colspan='6' class='text-center py-4'>Chưa có sản phẩm nào!</td></tr>";
+                    echo "<tr><td colspan='6' class='text-center py-4'>Không tìm thấy sản phẩm nào!</td></tr>";
                 }
                 ?>
             </tbody>

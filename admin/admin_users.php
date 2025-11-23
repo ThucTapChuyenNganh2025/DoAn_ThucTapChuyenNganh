@@ -3,14 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard - Quản Lý User</title>
+    <title>Quản Lý User - Admin</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
         body { background-color: #f4f6f9; font-family: 'Segoe UI', sans-serif; }
         
-        /* Sidebar */
         .sidebar {
             height: 100vh; width: 250px; position: fixed; top: 0; left: 0;
             background-color: #343a40; padding-top: 20px; color: white;
@@ -30,7 +29,6 @@
         }
         .main-content { margin-left: 250px; padding: 30px; }
         
-        /* Card Custom */
         .card-custom {
             background: white; border: none; border-radius: 8px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1); border-top: 5px solid #17a2b8;
@@ -44,9 +42,9 @@
 <body>
 
 <div class="sidebar">
-    <div class="brand"><i class="fa-solid fa-shop"></i> CHỢ ADMIN</div>
-    <a href="admin_duyettin.php"><i class="fa-solid fa-chart-line me-2"></i> Tổng Quan & Duyệt</a>
-    <a href="admin_sanpham.php"><i class="fa-solid fa-box-open me-2"></i> Kho Sản Phẩm</a>
+    <div class="brand"><i class="fa-solid fa-shop"></i> CHỢ ĐIỆN TỬ</div>
+    <a href="admin_duyettin.php"><i class="fa-solid fa-check-double me-2"></i> Duyệt Tin Mới</a>
+    <a href="admin_sanpham.php"><i class="fa-solid fa-box-open me-2"></i> KhoSản Phẩm</a>
     <a href="admin_users.php" class="active"><i class="fa-solid fa-users me-2"></i> Quản Lý User</a>
     <a href="#"><i class="fa-solid fa-right-from-bracket me-2"></i> Đăng Xuất</a>
 </div>
@@ -55,8 +53,7 @@
     
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h3 class="text-secondary">Danh Sách Thành Viên</h3>
-        <button class="btn btn-info text-white shadow-sm"><i class="fa-solid fa-user-plus"></i> Thêm User (Demo)</button>
-    </div>
+        </div>
 
     <div class="card card-custom p-4">
         <h4 class="mb-4 text-dark"><i class="fa-solid fa-users-gear text-info"></i> Tài Khoản Hệ Thống</h4>
@@ -74,12 +71,14 @@
             </thead>
             <tbody>
                 <?php
+                // Kết nối CSDL
                 include '../config/connect.php';
                 
                 $sql = "SELECT * FROM users ORDER BY id DESC";
                 $result = $conn->query($sql);
 
-                if ($result->num_rows > 0) {
+                if ($result && $result->num_rows > 0) {
+                    $stt = 1;
                     while($row = $result->fetch_assoc()) {
                         $firstLetter = strtoupper(substr($row['name'], 0, 1));
                         
@@ -88,7 +87,7 @@
                             : '<span class="badge bg-secondary">Chưa xác thực</span>';
 
                         echo "<tr>";
-                        echo "<td>#" . $row["id"] . "</td>";
+                        echo "<td>" . $stt++ . "</td>";
                         echo "<td>
                                 <div class='d-flex align-items-center'>
                                     <div class='avatar-circle me-2'>$firstLetter</div>
@@ -102,15 +101,14 @@
                         echo "<td>" . date("d/m/Y", strtotime($row["created_at"])) . "</td>";
                         echo "<td>" . $verifyBadge . "</td>";
                         
-                        // --- ĐOẠN NÀY ĐÃ SỬA LINK XÓA CHO BẠN ---
+                        // Nút Xóa: Trỏ về thư mục API
                         echo "<td>
-                                <a href='xuly_xoa_user.php?id=" . $row["id"] . "' 
+                                <a href='../api/xuly_xoa_user.php?id=" . $row["id"] . "' 
                                    class='btn btn-sm btn-outline-danger' 
-                                   onclick='return confirm(\"Cảnh báo: Xóa user sẽ xóa luôn tin đăng của họ! Bạn chắc chứ?\")'>
+                                   onclick='return confirm(\"Cảnh báo: Xóa user sẽ xóa luôn toàn bộ tin đăng của họ! Bạn chắc chứ?\")'>
                                     <i class='fa-solid fa-user-xmark'></i> Xóa
                                 </a>
                               </td>";
-                        // ----------------------------------------
                         
                         echo "</tr>";
                     }
