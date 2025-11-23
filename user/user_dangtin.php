@@ -1,7 +1,11 @@
 <?php
 session_start();
 include '../config/connect.php';
-if(!isset($_SESSION['user_id'])) { $_SESSION['user_id'] = 1; }
+
+// Tạm thời set user_id để test
+if(!isset($_SESSION['user_id'])) { 
+    $_SESSION['user_id'] = 1; 
+}
 
 if(isset($_POST['btn_dangtin'])) {
     $title = $_POST['title'];
@@ -9,34 +13,49 @@ if(isset($_POST['btn_dangtin'])) {
     $desc = $_POST['description'];
     $cate_id = $_POST['category_id'];
     $seller_id = $_SESSION['user_id'];
-    
-    // Xử lý Upload ảnh
-    $target_dir = "../uploads/"; // Lưu vào thư mục uploads ở ngoài (cùng cấp với user/)
-    
-    // Tạo thư mục nếu chưa có
-    if (!file_exists($target_dir)) { mkdir($target_dir, 0777, true); }
-    
-    $file_name = basename($_FILES["image"]["name"]);
-    // Đặt tên file ngẫu nhiên để tránh trùng (dùng timestamp)
-    $target_file = $target_dir . time() . "_" . $file_name;
-    
-    // Đường dẫn để lưu vào DB (bỏ ../ đi để sau này hiển thị cho dễ)
-    $db_image_path = "uploads/" . time() . "_" . $file_name;
 
-    if(move_uploaded_file($_FILES["image"]["tmp_name"], $target_file)) {
-        // Lưu vào DB
-        $sql = "INSERT INTO products (seller_id, category_id, title, description, price, image, status) 
-                VALUES ('$seller_id', '$cate_id', '$title', '$desc', '$price', '$db_image_path', 'pending')";
+    // 1) Insert sản phẩm vào bảng products
+    $sql_product = "INSERT INTO products (seller_id, category_id, title, description, price, status)
+                    VALUES ('$seller_id', '$cate_id', '$title', '$desc', '$price', 'pending')";
+
+    if($conn->query($sql_product)) {
+
+        // Lấy ID sản phẩm vừa tạo
+        $product_id = $conn->insert_id;
         
-        if($conn->query($sql) === TRUE) {
-            echo "<script>alert('Đăng tin thành công!'); window.location.href='user_dashboard.php';</script>";
-        } else {
-            echo "Lỗi DB: " . $conn->error;
+        // 2) Upload nhiều ảnh
+        $target_dir = "../uploads/";
+        if (!is_dir($target_dir)) mkdir($target_dir, 0777, true);
+
+        foreach ($_FILES['image']['name'] as $key => $name) {
+
+            if ($_FILES['image']['error'][$key] !== 0) continue;
+
+            $tmp = $_FILES['image']['tmp_name'][$key];
+            $new_name = time() . "_" . basename($name);
+
+            $target_file = $target_dir . $new_name;
+            $db_path = "uploads/" . $new_name;
+
+            // Lưu file vào thư mục uploads
+            if (move_uploaded_file($tmp, $target_file)) {
+
+                // 3) Lưu ảnh vào bảng product_images (đúng cột filename)
+                $sql_img = "INSERT INTO product_images (product_id, filename)
+                            VALUES ('$product_id', '$db_path')";
+                $conn->query($sql_img); 
+
+            } else {
+                echo "<script>alert('Lỗi upload hình!');</script>";
+            }
         }
-    } else {
-        echo "<script>alert('Lỗi upload ảnh!');</script>";
+
+        echo "<script>alert('Đăng tin thành công!'); window.location.href='user_dashboard.php';</script>";
+    } 
+    else {
+        echo "Lỗi khi thêm sản phẩm: " . $conn->error;
     }
-}
+}                                                               
 ?>
 
 <!DOCTYPE html>
@@ -47,7 +66,6 @@ if(isset($_POST['btn_dangtin'])) {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* CSS Sidebar giống file dashboard */
         body { background-color: #f4f6f9; font-family: 'Segoe UI', sans-serif; }
         .sidebar { height: 100vh; width: 250px; position: fixed; top: 0; left: 0; background-color: #ffffff; border-right: 1px solid #e0e0e0; padding-top: 20px; }
         .sidebar a { padding: 15px 25px; text-decoration: none; font-size: 16px; color: #555; display: block; transition: 0.3s; }
@@ -83,7 +101,9 @@ if(isset($_POST['btn_dangtin'])) {
                     </div>
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label>Giá bán (VNĐ)</label><input type="number" name="price" class="form-control" required placeholder="Nhập giá tiền (VD: 100000)" min="1000" step="1000" oninput="this.value = !!this.value && Math.abs(this.value) >= 0 ? Math.abs(this.value) : null">
+                            <label>Giá bán (VNĐ)</label>
+                            <input type="number" name="price" class="form-control" required placeholder="VD: 100000" min="1000" step="1000">
+                        </div>
                         <div class="col-md-6 mb-3">
                             <label>Danh mục</label>
                             <select name="category_id" class="form-select" required>
@@ -97,6 +117,7 @@ if(isset($_POST['btn_dangtin'])) {
                             </select>
                         </div>
                     </div>
+
                     <div class="mb-3">
                         <label>Mô tả chi tiết</label>
                         <textarea name="description" class="form-control" rows="5" placeholder="Mô tả tình trạng, xuất xứ..."></textarea>
@@ -105,9 +126,9 @@ if(isset($_POST['btn_dangtin'])) {
                 
                 <div class="col-md-4">
                     <div class="mb-3">
-                        <label>Hình ảnh (Bắt buộc)</label>
-                        <input type="file" name="image" class="form-control" required accept="image/*">
-                        <div class="mt-2 text-muted small">Chọn ảnh đẹp, rõ nét để bán nhanh hơn.</div>
+                        <label>Hình ảnh (có thể chọn nhiều)</label>
+                        <input type="file" name="image[]" multiple class="form-control" required>
+                        <div class="mt-2 text-muted small">Bạn có thể chọn nhiều hình cùng lúc.</div>
                     </div>
                 </div>
             </div>

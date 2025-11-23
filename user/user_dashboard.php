@@ -118,35 +118,54 @@ $approved = $conn->query("SELECT COUNT(*) as c FROM products WHERE seller_id = $
             </thead>
             <tbody>
                 <?php
-                // Query lấy tin mới nhất
-                $sql = "SELECT * FROM products WHERE seller_id = $my_id ORDER BY id DESC LIMIT 5";
+                // Lấy tin mới nhất kèm ảnh thumbnail
+                $sql = "
+                    SELECT p.*, 
+                        (SELECT filename 
+                            FROM product_images 
+                            WHERE product_id = p.id 
+                            ORDER BY sort_order ASC LIMIT 1) AS thumb
+                    FROM products p
+                    WHERE p.seller_id = $my_id
+                    ORDER BY p.id DESC
+                    LIMIT 5
+                ";
+
                 $result = $conn->query($sql);
 
                 if ($result && $result->num_rows > 0) {
                     while($row = $result->fetch_assoc()) {
-                        $stt = $row['status'] == 'pending' ? '<span class="badge bg-warning text-dark">Chờ duyệt</span>' : 
-                               ($row['status'] == 'approved' ? '<span class="badge bg-success">Đã duyệt</span>' : '<span class="badge bg-danger">Từ chối</span>');
-                        
-                        // Xử lý ảnh
-                        $img_url = !empty($row['image']) ? '../' . $row['image'] : 'https://via.placeholder.com/50';
+
+                        // Ảnh
+                        $img_url = !empty($row['thumb']) ? "../" . $row['thumb'] : "https://via.placeholder.com/50";
+
+                        // Trạng thái
+                        $stt = $row['status'] == 'pending'
+                                ? '<span class="badge bg-warning text-dark">Chờ duyệt</span>'
+                                : ($row['status'] == 'approved'
+                                    ? '<span class="badge bg-success">Đã duyệt</span>'
+                                    : '<span class="badge bg-danger">Từ chối</span>');
 
                         echo "<tr>";
-                        echo "<td><img src='$img_url' width='50' height='50' class='rounded border'></td>";
-                        echo "<td class='fw-bold'>" . $row['title'] . "</td>";
+                        echo "<td><img src='$img_url' width='50' height='50' class='rounded border' style='object-fit:cover;'></td>";
+                        echo "<td class='fw-bold'>{$row['title']}</td>";
                         echo "<td class='text-danger'>" . number_format($row['price']) . " đ</td>";
                         echo "<td>$stt</td>";
                         echo "<td>
-                                <a href='user_sua_tin.php?id=" . $row['id'] . "' class='btn btn-sm btn-outline-primary'><i class='fa-solid fa-pen'></i> Sửa</a>
-                                
-                                <a href='xuly_xoa_tin.php?id=" . $row['id'] . "' 
-                                   class='btn btn-sm btn-outline-danger'
-                                   onclick='return confirm(\"Bạn có chắc chắn muốn xóa tin này không?\")'>
-                                   <i class='fa-solid fa-trash'></i> Xóa
+                                <a href='user_sua_tin.php?id={$row['id']}' class='btn btn-sm btn-outline-primary'>
+                                    <i class='fa-solid fa-pen'></i> Sửa
                                 </a>
-                              </td>";
+
+                                <a href='xuly_xoa_tin.php?id={$row['id']}' 
+                                class='btn btn-sm btn-outline-danger'
+                                onclick='return confirm(\"Bạn có chắc chắn muốn xóa tin này không?\")'>
+                                <i class='fa-solid fa-trash'></i> Xóa
+                                </a>
+                            </td>";
                         echo "</tr>";
                     }
-                } else {
+                }
+                else {
                     echo "<tr><td colspan='5' class='text-center text-muted'>Chưa có tin nào!</td></tr>";
                 }
                 ?>
