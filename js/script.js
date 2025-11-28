@@ -566,10 +566,20 @@ $(document).on("click", ".btn-wishlist", function (e) {
   }
 
   // Check if user is logged in by checking session
+  // collect metadata to send to server so favorites stored with useful info
+  var metaTitle = $product.find(".product-name").first().text().trim() || "";
+  var metaPrice = $product.find(".price").first().text().trim() || "";
+  var metaImage = $product.find("img").first().attr("src") || "";
+
   $.ajax({
     url: "favorites/handle_favorite.php",
     method: "POST",
-    data: { product_id: productId },
+    data: {
+      product_id: productId,
+      title: metaTitle,
+      price: metaPrice,
+      image: metaImage,
+    },
     dataType: "json",
     success: function (data) {
       if (data.status === "success") {
@@ -718,7 +728,7 @@ function renderFavoritesIntoOffcanvas() {
       // Render each favorite product
       data.favorites.forEach(function (product) {
         var imgSrc = product.image
-          ? "uploads/" + product.image
+          ? product.image
           : "images/default-product.jpg";
         var name = product.title || product.name || "Sản phẩm";
         var price = product.price || "0";
