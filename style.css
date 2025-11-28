@@ -1,0 +1,1180 @@
+
+/* Fix background dư ra ở slide 1 banner chính */
+.banner-ad .swiper-slide:first-child {
+  min-height: unset;
+  height: auto;
+  background-size: cover;
+  background-position: center;
+}
+/* Giảm riêng chiều cao slide 1 của banner chính */
+.banner-ad .swiper-slide:first-child {
+  min-height: 300px;
+}
+/* Fixed logo width in header */
+.footer-menu .logo,
+header .main-logo img {
+  width: 160px;
+  height: auto;
+  max-width: 100%;
+}
+
+@media (max-width: 576px) {
+  header .main-logo img {
+    width: 130px;
+  }
+}
+/* ==========================================================================
+   1. VARIABLES
+   ========================================================================== */
+:root {
+  /* Header heights */
+  --header-height: 160px;
+  --header-height-min: 80px;
+
+  /* Theme colors */
+  --accent-color: #ffc43f;
+  --dark-color: #222222;
+  --light-dark-color: #727272;
+  --light-color: #fff;
+  --grey-color: #dbdbdb;
+  --light-grey-color: #fafafa;
+  --primary-color: #6995b1;
+  --light-primary-color: #eef1f3;
+  /* Fonts */
+  --body-font: "Open Sans", sans-serif;
+  --heading-font: "Nunito", sans-serif;
+}
+.bg-discount {
+  background-color: #ff3333;
+}
+
+@media (max-width: 600px) {
+  :root {
+    --header-height: 100px;
+    --header-height-min: 80px;
+  }
+}
+/* ==========================================================================
+   2. GENERAL TYPOGRAPHY
+   ========================================================================== */
+body {
+  --bs-link-color: #333;
+  --bs-link-hover-color: #333;
+  --bs-link-color-rgb: 40, 40, 40;
+  --bs-link-hover-color-rgb: 0, 0, 0;
+  --bs-light-rgb: 248, 248, 248;
+
+  --bs-body-font-family: var(--body-font);
+  --bs-body-font-size: 1rem;
+  --bs-body-font-weight: 400;
+  --bs-body-line-height: 2;
+  --bs-body-color: #747474;
+
+  --bs-primary: #ffc43f;
+  --bs-primary-rgb: 255, 196, 63;
+
+  --bs-success: #a3be4c;
+  --bs-success-rgb: 163, 190, 76;
+
+  --bs-primary-bg-subtle: #fff9eb;
+  --bs-success-bg-subtle: #eef5e5;
+
+  --bs-border-color: #f7f7f7;
+
+  --bs-secondary-rgb: 230, 243, 251;
+  --bs-danger-rgb: 249, 235, 231;
+  --bs-warning-rgb: 255, 249, 235;
+  --bs-info-rgb: 230, 243, 250;
+
+  letter-spacing: 0.03em;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.display-1,
+.display-2,
+.display-3,
+.display-4,
+.display-5,
+.display-6 {
+  font-family: var(--heading-font);
+  font-weight: 700;
+  color: var(--dark-color);
+}
+
+.breadcrumb.text-white {
+  --bs-breadcrumb-divider-color: #fff;
+  --bs-breadcrumb-item-active-color: var(--bs-primary);
+}
+
+.dropdown-menu {
+  --bs-dropdown-link-active-bg: var(--bs-primary);
+}
+
+.nav-pills .nav-link {
+  --bs-nav-pills-link-active-color: #111;
+  --bs-nav-pills-link-active-bg: #f1f1f1;
+}
+
+.container,
+.container-fluid,
+.container-lg,
+.container-md,
+.container-sm,
+.container-xl,
+.container-xxl {
+  --bs-gutter-x: 3rem;
+}
+
+/* ==========================================================================
+   3. BUTTONS
+   ========================================================================== */
+.btn-primary {
+  --bs-btn-color: #fff;
+  --bs-btn-bg: #ffc43f;
+  --bs-btn-border-color: transparent;
+  --bs-btn-hover-bg: #f7a422;
+  --bs-btn-disabled-bg: #d3d7dd;
+}
+
+.btn-outline-primary {
+  --bs-btn-color: #ffc43f;
+  --bs-btn-border-color: #ffc43f;
+  --bs-btn-hover-bg: #ffc107;
+}
+
+.btn-outline-light {
+  --bs-btn-color: #747474;
+  --bs-btn-border-color: #efefef;
+  --bs-btn-hover-bg: #efefef;
+}
+
+.btn-warning {
+  --bs-btn-color: #747474;
+  --bs-btn-bg: #fcf7eb;
+  --bs-btn-hover-bg: #ffecbe;
+}
+
+.btn-success {
+  --bs-btn-color: #222;
+  --bs-btn-bg: #eef5e4;
+  --bs-btn-hover-bg: #9de3c2;
+}
+
+.btn-danger {
+  --bs-btn-color: #222;
+  --bs-btn-bg: #ffeada;
+  --bs-btn-hover-bg: #ecc9af;
+}
+
+/* ==========================================================================
+   4. HEADER & PRELOADER
+   ========================================================================== */
+.preloader-wrapper {
+  width: 100%;
+  height: 100vh;
+  position: fixed;
+  inset: 0;
+  background: #fff;
+  z-index: 111;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.preloader {
+  position: relative;
+  width: 2em;
+  height: 2em;
+  border-radius: 50%;
+  transform: translateZ(0);
+  animation: animate 1.2s infinite ease-in-out;
+  animation-delay: -0.16s;
+}
+
+.preloader:before,
+.preloader:after {
+  content: "";
+  position: absolute;
+  top: 0;
+  width: 2em;
+  height: 2em;
+  border-radius: 50%;
+  animation: animate 1.2s infinite ease-in-out;
+}
+
+.preloader:before {
+  left: -3.5em;
+  animation-delay: -0.32s;
+}
+
+/* Header logout icon sizing helper */
+.header-logout-icon {
+  font-size: 24px;
+  line-height: 1;
+}
+
+/* Header action icons: uniform size and spacing */
+.header-action-icon {
+  font-size: 20px;
+  line-height: 1;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+/* Make the greeting and username smaller and less prominent */
+.support-box {
+  text-align: right;
+}
+.support-box .fs-6 {
+  font-size: 0.85rem;
+}
+.support-box h5 {
+  font-size: 0.95rem;
+  margin: 0;
+  font-weight: 600;
+}
+
+/* Homepage logo pill */
+header .logo-box {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 20px;
+  background: #263238;
+  color: #fff;
+  border-radius: 10px;
+  text-decoration: none;
+  box-shadow: 0 2px 6px rgba(11, 14, 16, 0.12);
+}
+
+header .logo-box i {
+  background: #ff9f43;
+  color: #fff;
+  padding: 6px;
+  border-radius: 6px;
+  font-size: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+}
+
+header .logo-box .logo-text {
+  text-transform: uppercase;
+  font-weight: 900;
+  font-size: 18px;
+  letter-spacing: 1.4px;
+  color: #ffffff;
+  line-height: 1;
+  margin: 0;
+}
+
+/* Adjust icon containers to have matching padding and background */
+.header-icons-list a.rounded-circle {
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.preloader:after {
+  left: 3.5em;
+}
+
+@keyframes animate {
+  0%,
+  80%,
+  100% {
+    box-shadow: 0 2em 0 -1em var(--accent-color);
+  }
+  40% {
+    box-shadow: 0 2em 0 0 var(--accent-color);
+  }
+}
+
+/* ==========================================================================
+   5. CUSTOM DROPDOWN
+   ========================================================================== */
+.custom-dropdown {
+  position: relative;
+  width: 100%;
+  cursor: pointer;
+}
+
+.dropdown-selected {
+  padding: 12px 15px;
+  background: #f8f8f8;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  font-weight: 600;
+  color: #222;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+
+.dropdown-selected:hover {
+  background: #f0f0f0;
+  border-color: #ccc;
+}
+
+.dropdown-list {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  list-style: none;
+  padding: 8px 0;
+  margin-top: 8px;
+  display: none;
+  z-index: 999;
+  border: 1px solid #ddd;
+}
+
+.dropdown-list li {
+  height: auto;
+  line-height: 1.5;
+  padding: 12px 15px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s;
+  color: #333;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.dropdown-list li:hover,
+.dropdown-list li.selected {
+  background: #ffc43f;
+  color: #fff;
+  font-weight: 700;
+}
+}
+
+/* ==========================================================================
+   6. SEARCH INPUT
+   ========================================================================== */
+#search-form input {
+  height: 48px;
+  padding: 0 12px;
+  border-radius: 8px 0 0 8px;
+}
+
+#search-form button.btn {
+  height: 48px;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ==========================================================================
+   7. BANNERS & LAYOUT
+   ========================================================================== */
+.container-fluid {
+  max-width: 1600px;
+}
+
+.banner-blocks {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+  gap: 2rem;
+}
+
+.block-1 {
+  grid-area: 1 / 1 / 3 / 8;
+}
+.block-2 {
+  grid-area: 1 / 8 / 2 / 13;
+}
+.block-3 {
+  grid-area: 2 / 8 / 3 / 13;
+}
+
+@media (max-width: 1140px) {
+  .banner-blocks {
+    grid-template-columns: 1fr;
+    grid-template-rows: repeat(4, 1fr);
+  }
+
+  .block-1 {
+    grid-area: 1 / 1 / 3 / 2;
+  }
+  .block-2 {
+    grid-area: 3 / 1 / 4 / 2;
+  }
+  .block-3 {
+    grid-area: 4 / 1 / 5 / 2;
+  }
+}
+
+/* ==========================================================================
+   8. BANNER ADS
+   ========================================================================== */
+.banner-ad {
+  position: relative;
+  overflow: hidden;
+  border-radius: 12px;
+}
+
+.banner-ad.blue {
+  background: #e6f3fb;
+}
+
+.banner-ad .swiper-pagination {
+  bottom: 40px;
+  left: 0;
+  right: 0;
+}
+
+.banner-ad .swiper-pagination .swiper-pagination-bullet {
+  width: 16px;
+  height: 16px;
+  margin: 4px;
+  background: #fff;
+  opacity: 1;
+  transition: background 0.3s;
+}
+
+.banner-ad .swiper-pagination-bullet-active {
+  background: var(--accent-color);
+}
+
+.banner-ad .swiper-slide {
+  min-height: 400px;
+  display: flex;
+}
+
+/* Ensure post thumbnails are consistent */
+.tab-image {
+  width: 100%;
+  height: 160px;
+  object-fit: cover;
+  display: block;
+}
+
+/* Ensure AJAX-inserted compact product markup receives similar card body/footer spacing */
+.product-item.compact {
+  display: flex;
+  flex-direction: column;
+}
+.product-item.compact .card-body {
+  padding: 0.75rem;
+}
+.product-item.compact .card-footer {
+  padding: 0.5rem 0.75rem;
+}
+
+/* Force description visibility for compact product cards */
+.product-item.compact {
+  align-items: stretch; /* allow body to fill width */
+}
+.product-item.compact .card-body {
+  text-align: left;
+}
+.product-item.compact .card-text {
+  display: block !important;
+  color: #6c757d !important; /* muted color */
+  max-height: none !important;
+  line-clamp: unset !important;
+  -webkit-line-clamp: unset !important;
+  overflow: visible !important;
+}
+
+.banner-ad .banner-content .categories {
+  font-family: var(--body-font);
+  font-size: 37px;
+  text-transform: capitalize;
+  color: var(--dark-color);
+}
+
+.banner-ad .banner-content .sale {
+  position: relative;
+  display: inline-block;
+}
+
+.banner-ad .banner-content .sale:before {
+  content: "";
+  width: 80px;
+  border-bottom: 1px solid #111;
+  position: absolute;
+  bottom: 6px;
+}
+
+.banner-ad .banner-content .sale:after {
+  content: "SALE";
+  font-family: var(--body-font);
+  font-size: 11px;
+  letter-spacing: 0.3em;
+  position: absolute;
+  bottom: 0;
+  right: 0;
+}
+
+.banner-ad .banner-content .banner-title {
+  font-size: 33px;
+  letter-spacing: 0.02em;
+}
+
+.banner-ad.large .categories {
+  color: var(--accent-color);
+}
+.banner-ad.large .banner-title {
+  font-size: 54px;
+}
+
+/* ==========================================================================
+   9. SWIPER NAV BUTTONS
+   ========================================================================== */
+.swiper-prev,
+.swiper-next {
+  width: 38px;
+  height: 38px;
+  background: #fff;
+  color: #111;
+  text-align: center;
+  border-radius: 10px;
+  padding: 0;
+}
+.swiper-prev:hover,
+.swiper-next:hover {
+  background: var(--accent-color);
+}
+.swiper-buttons {
+  margin-left: 20px;
+}
+.swiper-buttons .btn {
+  border: 1px solid #ffb700;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  padding: 0;
+  transition: 0.3s;
+}
+
+.swiper-buttons .btn:hover {
+  background-color: #ffb700; /* màu hover */
+  color: #fff;
+}
+
+/* ==========================================================================
+   10. CATEGORY CAROUSEL
+   ========================================================================== */
+.category-carousel .category-item,
+.brand-carousel .brand-item {
+  background: #fff;
+  border: 1px solid #fbfbfb;
+  box-shadow: 0px 5px 22px rgba(0, 0, 0, 0.04);
+  border-radius: 16px;
+}
+
+.category-carousel .category-item {
+  text-align: center;
+  padding: 60px 20px;
+  margin: 20px 0;
+  transition: 0.3s;
+}
+
+.category-carousel .category-item:hover {
+  transform: translateY(-10px);
+  box-shadow: 0px 21px 44px rgba(0, 0, 0, 0.08);
+}
+
+.category-carousel .category-title {
+  font-weight: 600;
+  font-size: 20px;
+  margin-top: 20px;
+  color: #222;
+}
+.category-carousel .category-item i {
+  font-size: 48px;
+  color: #36648b;
+}
+
+/* ==========================================================================
+   11. BRAND CAROUSEL
+   ========================================================================== */
+.brand-carousel .brand-item {
+  padding: 16px;
+}
+
+.brand-carousel .brand-item img {
+  width: 100%;
+  border-radius: 12px;
+}
+
+.brand-carousel .brand-details {
+  margin-left: 15px;
+}
+
+.brand-carousel .swiper-slide {
+  background: #fff;
+  border: 1px solid #fbfbfb;
+  border-radius: 16px;
+  box-shadow: 0px 5px 22px rgba(0, 0, 0, 0.04);
+  /* padding: 30px; */
+  transition: 0.3s ease;
+  text-align: center;
+}
+
+.brand-carousel .swiper-slide i {
+  font-size: 64px;
+  color: #111;
+}
+
+.brand-carousel .swiper-slide:hover {
+  transform: translateY(-10px);
+  box-shadow: 0px 21px 44px rgba(0, 0, 0, 0.08);
+}
+
+/* ==================== PRODUCT ITEM ==================== */
+.product-item {
+  position: relative;
+  background: #fff;
+  border: 1px solid #fbfbfb;
+  box-shadow: 0px 5px 22px rgba(0, 0, 0, 0.04);
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 30px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: 0.3s;
+}
+
+/* Post-item: reuse product styling but with article-specific polish */
+.post-item {
+  background: #fff;
+  border: 1px solid #f0f0f0;
+  box-shadow: 0 8px 30px rgba(17, 24, 39, 0.04);
+  border-radius: 12px;
+  padding: 14px;
+  transition: transform 180ms ease, box-shadow 180ms ease;
+}
+.post-item:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 18px 44px rgba(17, 24, 39, 0.08);
+}
+.post-item .favorite-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #fff;
+  border: 1px solid #eee;
+  z-index: 10;
+}
+.post-item .post-title {
+  font-size: 16px;
+  font-weight: 600;
+  margin-top: 8px;
+}
+.post-item .post-excerpt {
+  font-size: 14px;
+  color: #666;
+  margin: 8px 0 12px;
+  max-height: 3.2em; /* clamp ~2 lines */
+  overflow: hidden;
+}
+.post-item .price {
+  font-size: 15px;
+  font-weight: 700;
+  color: #0b6623;
+}
+
+.product-item:hover {
+  box-shadow: 0px 21px 44px rgba(0, 0, 0, 0.08);
+}
+
+/* Wishlist button */
+.product-item .btn-wishlist {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #fff;
+  border: 1px solid #d8d8d8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: 0.3s;
+  z-index: 10;
+}
+.product-item .btn-wishlist:hover {
+  background: rgb(240, 56, 56);
+  color: #fff;
+}
+
+/* Ensure SVG icons follow the button color */
+.product-item .btn-wishlist svg,
+.product-item .btn-wishlist use {
+  color: inherit;
+  fill: currentColor;
+}
+
+/* Product Image */
+.product-item figure {
+  width: 100%;
+  height: 200px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #f9f9f9;
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 1rem;
+}
+.product-item figure img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* Compact variant: smaller thumbnails and tighter cards for 'Bài viết mới' */
+.product-item.compact {
+  padding: 10px;
+  margin-bottom: 16px;
+  border-radius: 10px;
+}
+.product-item.compact figure {
+  height: 140px; /* smaller thumbnail height */
+  border-radius: 8px;
+}
+.product-item.compact figure img {
+  object-fit: cover; /* crop to fill thumbnail */
+}
+.product-item.compact h3 {
+  font-size: 15px;
+  margin: 0.4rem 0;
+}
+.product-item.compact .price {
+  font-size: 16px;
+}
+
+/* Optionally show 4 columns on wide screens for compact view */
+@media (min-width: 1200px) {
+  .products-compact-row .col-md-3 {
+    display: block;
+  }
+}
+
+/* Product info */
+.product-item h3 {
+  font-size: 18px;
+  font-weight: 600;
+  text-align: center;
+  margin: 0.5rem 0;
+}
+
+.product-meta {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  font-size: 13px;
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+}
+
+.product-item .price {
+  font-weight: 600;
+  font-size: 22px;
+  color: #000;
+  margin-bottom: 0.5rem;
+}
+
+/* Global override: ensure all elements with class .price display as black for consistency */
+.price {
+  color: #000 !important;
+}
+
+/* Wishlist button feedback */
+
+.btn-wishlist--loading {
+  opacity: 0.6;
+  transform: scale(0.98);
+  transition: transform 140ms ease, opacity 140ms ease,
+    background-color 200ms ease, color 200ms ease;
+  pointer-events: none;
+}
+
+/* Favorited state: visible color + subtle shadow */
+.product-item .btn-wishlist.favorited {
+  background: #ff3b3b;
+  color: #fff;
+  border-color: transparent;
+  box-shadow: 0 8px 22px rgba(255, 59, 59, 0.18);
+  transform: translateZ(0) scale(1.04);
+  transition: transform 240ms cubic-bezier(0.2, 0.9, 0.3, 1),
+    background-color 180ms ease, box-shadow 200ms ease;
+}
+
+/* Pulse with shadow for stronger feedback */
+.btn-wishlist-pulse {
+  animation: sm-pulse 420ms cubic-bezier(0.2, 0.9, 0.3, 1);
+}
+
+@keyframes sm-pulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 rgba(0, 0, 0, 0);
+  }
+  40% {
+    transform: scale(1.18);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+  }
+  70% {
+    transform: scale(1.06);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 rgba(0, 0, 0, 0);
+  }
+}
+
+/* Quantity + Cart wrapper - simplified and responsive
+   - grid on wide screens: quantity control + fixed cart cell
+   - stacked on small screens
+   - modest, accessible sizes so layout is balanced across variants
+*/
+.qty-cart-wrapper {
+  display: inline-grid;
+  grid-auto-flow: column;
+  grid-auto-columns: auto;
+  align-items: center;
+  justify-content: center; /* center the whole group */
+  gap: 0.25rem; /* tighten spacing */
+  width: auto;
+  margin-top: 0.5rem;
+}
+
+/* cart cell: keep square tappable area but allow the icon itself to scale */
+.qty-cart-wrapper > a.nav-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0.15rem;
+  border-radius: 6px;
+}
+
+/* product-qty input-group: compact, horizontally centered content */
+.qty-cart-wrapper .input-group.product-qty,
+.qty-cart-wrapper .product-qty {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.qty-cart-wrapper .product-qty button.btn-number {
+  min-width: 34px;
+  min-height: 34px;
+  padding: 0.18rem;
+  border-radius: 6px;
+  border: 1px solid #e6e6e6;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.qty-cart-wrapper .product-qty input.input-number {
+  width: 48px;
+  height: 36px;
+  text-align: center;
+  padding: 0;
+  font-size: 15px;
+  border: 1px solid #e6e6e6;
+}
+
+.qty-cart-wrapper .cart-icon {
+  font-size: 20px;
+  color: #222;
+}
+
+/* Hover affordance */
+.qty-cart-wrapper > a.nav-link:hover .cart-icon,
+.qty-cart-wrapper > a.nav-link:focus .cart-icon {
+  color: var(--accent-color, #ffc43f);
+}
+
+/* stacked layout on narrow screens */
+@media (max-width: 768px) {
+  .qty-cart-wrapper {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+    width: 100%;
+  }
+  .qty-cart-wrapper > a.nav-link {
+    width: 36px;
+    height: 36px;
+  }
+}
+
+/* Also support legacy product control wrappers that use Bootstrap utility classes
+   This keeps cart icon centered even when `.qty-cart-wrapper` wasn't applied. */
+.product-item > .d-flex.align-items-center.justify-content-between.mt-2,
+.product-item .d-flex.align-items-center.justify-content-between.mt-2 {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.product-item
+  .d-flex.align-items-center.justify-content-between.mt-2
+  a.nav-link,
+.product-item
+  > .d-flex.align-items-center.justify-content-between.mt-2
+  a.nav-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  padding: 0.25rem;
+  border-radius: 8px;
+}
+
+.product-item
+  .d-flex.align-items-center.justify-content-between.mt-2
+  .product-qty,
+.product-item
+  > .d-flex.align-items-center.justify-content-between.mt-2
+  .product-qty,
+.product-item
+  .d-flex.align-items-center.justify-content-between.mt-2
+  .input-group.product-qty,
+.product-item
+  > .d-flex.align-items-center.justify-content-between.mt-2
+  .input-group.product-qty {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+@media (max-width: 768px) {
+  .product-item > .d-flex.align-items-center.justify-content-between.mt-2,
+  .product-item .d-flex.align-items-center.justify-content-between.mt-2 {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: stretch;
+  }
+  .product-item
+    > .d-flex.align-items-center.justify-content-between.mt-2
+    a.nav-link {
+    width: 100%;
+    height: 40px;
+  }
+}
+
+/* Make sure the quantity control is allowed to shrink so the fixed cart cell can center
+   This addresses cases where input-group or product-qty set a large intrinsic width. */
+.product-item .product-qty,
+.product-item .input-group.product-qty {
+  flex: 1 1 auto;
+  min-width: 0; /* allow shrinking inside grid/flex */
+}
+
+.product-item .product-qty + a.nav-link,
+.product-item .input-group.product-qty + a.nav-link,
+.qty-cart-wrapper > a.nav-link {
+  flex: 0 0 40px;
+  width: 40px;
+  height: 40px;
+}
+
+/* Ensure the icon fills and centers inside the anchor */
+.product-item a.nav-link .cart-icon,
+.qty-cart-wrapper a.nav-link .cart-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  line-height: 1;
+}
+
+/* keep the numeric input compact when possible */
+.product-item .product-qty input.input-number {
+  flex: 0 0 56px;
+}
+
+/* Explicitly target the SVG (or inline SVG wrapper) and font-icon fallbacks
+   to avoid intrinsic-box quirks. This forces a centered, consistent icon. */
+.product-item a.nav-link .cart-icon svg,
+.qty-cart-wrapper a.nav-link .cart-icon svg {
+  display: block;
+  width: 18px;
+  height: 18px;
+  margin: auto;
+}
+
+.product-item a.nav-link .cart-icon,
+.qty-cart-wrapper a.nav-link .cart-icon {
+  font-size: 18px; /* fallback for icon fonts */
+}
+
+/* === Hide cart and quantity controls site-wide (non-destructive) === */
+/* Use this to remove cart icons and quantity selectors from product cards */
+.qty-cart-wrapper,
+.product-qty,
+.qty-cart-wrapper a.nav-link,
+.product-item a.nav-link .cart-icon,
+.cart-icon {
+  display: none !important;
+  visibility: hidden !important;
+}
+
+/* Also hide any quantity +/- buttons created by JS */
+.quantity-left-minus,
+.quantity-right-plus,
+.input-number {
+  display: none !important;
+}
+
+/* ==========================================================================
+   13. RESPONSIVE
+   ========================================================================== */
+@media (max-width: 991px) {
+  .offcanvas-body .nav-item {
+    font-weight: 700;
+    border-bottom: 1px solid #d1d1d1;
+  }
+
+  .offcanvas-body .filter-categories {
+    width: 100%;
+    margin-bottom: 20px !important;
+    border: 1px solid #d1d1d1 !important;
+    padding: 14px;
+    border-radius: 8px;
+  }
+
+  .dropdown-menu {
+    padding: 0;
+    border: none;
+    font-size: 0.9em;
+  }
+
+  .dropdown-toggle::after {
+    position: absolute;
+    right: 0;
+    top: 21px;
+  }
+}
+
+/* ==========================================================================
+   14. PRODUCT THUMBNAIL SLIDER
+   ========================================================================== */
+.product-thumbnail-slider {
+  height: 740px;
+}
+
+@media (max-width: 992px) {
+  .product-thumbnail-slider {
+    margin-top: 20px;
+    height: auto;
+  }
+}
+
+/* ==========================================================================
+   15. SEARCH RESULTS CARD FIXED SIZE
+   - Ensure consistent card size inside the search swiper
+   ========================================================================== */
+#search-results-section .swiper-slide {
+  /* Let Swiper manage slide width; focus on card height */
+  height: auto !important;
+}
+
+#search-results-section .product-item {
+  /* Fixed card height for consistency */
+  height: 320px !important;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  overflow: hidden;
+}
+
+#search-results-section .product-item figure {
+  height: 160px !important; /* fixed thumbnail area */
+}
+
+#search-results-section .product-item figure img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* fill and crop for uniform look */
+}
+
+#search-results-section .product-item h3.product-name {
+  font-size: 16px;
+  margin: 8px 0 4px;
+  line-height: 1.4;
+  line-clamp: 2;
+  display: -webkit-box;
+  -webkit-line-clamp: 2; /* clamp to 2 lines */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+#search-results-section .product-item .card-text {
+  font-size: 13px;
+  color: #6c757d;
+  margin-bottom: 6px;
+  line-clamp: 2;
+  display: -webkit-box;
+  -webkit-line-clamp: 2; /* clamp to 2 lines */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+#search-results-section .product-item .price {
+  margin-top: auto; /* push price to bottom */
+  font-size: 16px;
+}
+
+/* Ensure the swiper container doesn't constrain height unexpectedly */
+#search-results-section .swiper {
+  height: auto !important;
+  overflow: visible;
+}
+
+@media (min-width: 992px) {
+  .product-thumbnail-slider {
+    height: 520px;
+  }
+}
+
+@media (min-width: 1200px) {
+  .product-thumbnail-slider {
+    height: 740px;
+  }
+}
