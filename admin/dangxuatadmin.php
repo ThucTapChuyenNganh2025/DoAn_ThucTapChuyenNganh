@@ -1,9 +1,5 @@
 <?php
-session_start();          // Bắt đầu session
-session_unset();          // Xóa tất cả biến session
-session_destroy();        // Hủy session
-
-// Chuyển hướng về trang đăng nhập
-header("Location: ../admin/dangnhapadmin.php"); 
+session_start();
+session_destroy();
+header("Location: dangnhapadmin.php");
 exit();
-?>

@@ -15,7 +15,8 @@ include '../config/connect.php';
 
 if (isset($_POST['login_admin'])) {
     $username = trim($_POST['username']);
-    $password = $_POST['password'];
+    // Trim password to avoid accidental whitespace errors from copy/paste
+    $password = trim($_POST['password']);
 
     // Tìm admin theo username
     $stmt = $conn->prepare("SELECT id, fullname, username, password, role FROM admins WHERE username = ?");
@@ -27,12 +28,49 @@ if (isset($_POST['login_admin'])) {
         $admin = $result->fetch_assoc();
         if (password_verify($password, $admin['password'])) {
             // Đăng nhập thành công
+            // If the stored hash needs to be rehashed (e.g., algorithm/options changed), rehash it now
+            if (password_needs_rehash($admin['password'], PASSWORD_BCRYPT)) {
+                $rehash = password_hash($password, PASSWORD_BCRYPT);
+                $rehashStmt = $conn->prepare("UPDATE admins SET password = ? WHERE id = ?");
+                $rehashStmt->bind_param("si", $rehash, $admin['id']);
+                $rehashStmt->execute();
+                $rehashStmt->close();
+            }
             $_SESSION['admin_id'] = $admin['id'];
             $_SESSION['admin_name'] = $admin['fullname'];
             $_SESSION['admin_role'] = $admin['role'];
-            header('location:indexadmin.php');
+            // Đăng nhập thành công thì chuyển sang trang Duyệt Tin
+            header('location:admin_duyettin.php');
             exit;
         } else {
+            // If password_verify failed, check for legacy stored plaintext or md5 hashed passwords
+            // If admin created before the app used password_hash, they might have plaintext or md5
+            $legacyMatch = false;
+            // Direct plaintext match (unsafe but supports legacy)
+            if ($password === $admin['password']) {
+                $legacyMatch = true;
+            }
+            // MD5 legacy support
+            if (!$legacyMatch && md5($password) === $admin['password']) {
+                $legacyMatch = true;
+            }
+
+            if ($legacyMatch) {
+                // Re-hash the password using password_hash for security and update DB
+                $newHash = password_hash($password, PASSWORD_BCRYPT);
+                $updateStmt = $conn->prepare("UPDATE admins SET password = ? WHERE id = ?");
+                $updateStmt->bind_param("si", $newHash, $admin['id']);
+                $updateStmt->execute();
+                $updateStmt->close();
+
+                // Set session and redirect as normal
+                $_SESSION['admin_id'] = $admin['id'];
+                $_SESSION['admin_name'] = $admin['fullname'];
+                $_SESSION['admin_role'] = $admin['role'];
+                header('location:admin_duyettin.php');
+                exit;
+            }
+
             echo '<div class="alert alert-danger text-center">Sai mật khẩu Admin!</div>';
         }
     } else {
@@ -41,7 +79,7 @@ if (isset($_POST['login_admin'])) {
     $stmt->close();
 }
 ?>
-    <<div class="d-flex justify-content-center align-items-center" style="min-height:100vh; background:#ffffff;">
+    <div class="d-flex justify-content-center align-items-center" style="min-height:100vh; background:#ffffff;">
         <div class="card shadow-lg border-0" style="width: 500px;">
             <div class="card-body">
                 <h2 class="text-center text-danger fw-bold mb-4"> Đăng nhập Admin</h2>
