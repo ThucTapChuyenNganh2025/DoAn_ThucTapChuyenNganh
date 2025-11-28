@@ -9,6 +9,19 @@
 .banner-ad .swiper-slide:first-child {
   min-height: 300px;
 }
+/* Fixed logo width in header */
+.footer-menu .logo,
+header .main-logo img {
+  width: 160px;
+  height: auto;
+  max-width: 100%;
+}
+
+@media (max-width: 576px) {
+  header .main-logo img {
+    width: 130px;
+  }
+}
 /* ==========================================================================
    1. VARIABLES
    ========================================================================== */
@@ -199,6 +212,42 @@ h6,
   animation-delay: -0.32s;
 }
 
+/* Header logout icon sizing helper */
+.header-logout-icon {
+  font-size: 24px;
+  line-height: 1;
+}
+
+/* Header action icons: uniform size and spacing */
+.header-action-icon {
+  font-size: 20px;
+  line-height: 1;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+/* Make the greeting and username smaller and less prominent */
+.support-box {
+  text-align: right;
+}
+.support-box .fs-6 {
+  font-size: 0.85rem;
+}
+.support-box h5 {
+  font-size: 0.95rem;
+  margin: 0;
+  font-weight: 600;
+}
+
+/* Adjust icon containers to have matching padding and background */
+.header-icons-list a.rounded-circle {
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .preloader:after {
   left: 3.5em;
 }
@@ -356,6 +405,42 @@ h6,
 .banner-ad .swiper-slide {
   min-height: 400px;
   display: flex;
+}
+
+/* Ensure post thumbnails are consistent */
+.tab-image {
+  width: 100%;
+  height: 160px;
+  object-fit: cover;
+  display: block;
+}
+
+/* Ensure AJAX-inserted compact product markup receives similar card body/footer spacing */
+.product-item.compact {
+  display: flex;
+  flex-direction: column;
+}
+.product-item.compact .card-body {
+  padding: 0.75rem;
+}
+.product-item.compact .card-footer {
+  padding: 0.5rem 0.75rem;
+}
+
+/* Force description visibility for compact product cards */
+.product-item.compact {
+  align-items: stretch; /* allow body to fill width */
+}
+.product-item.compact .card-body {
+  text-align: left;
+}
+.product-item.compact .card-text {
+  display: block !important;
+  color: #6c757d !important; /* muted color */
+  max-height: none !important;
+  line-clamp: unset !important;
+  -webkit-line-clamp: unset !important;
+  overflow: visible !important;
 }
 
 .banner-ad .banner-content .categories {
@@ -523,6 +608,51 @@ h6,
   transition: 0.3s;
 }
 
+/* Post-item: reuse product styling but with article-specific polish */
+.post-item {
+  background: #fff;
+  border: 1px solid #f0f0f0;
+  box-shadow: 0 8px 30px rgba(17, 24, 39, 0.04);
+  border-radius: 12px;
+  padding: 14px;
+  transition: transform 180ms ease, box-shadow 180ms ease;
+}
+.post-item:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 18px 44px rgba(17, 24, 39, 0.08);
+}
+.post-item .favorite-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #fff;
+  border: 1px solid #eee;
+  z-index: 10;
+}
+.post-item .post-title {
+  font-size: 16px;
+  font-weight: 600;
+  margin-top: 8px;
+}
+.post-item .post-excerpt {
+  font-size: 14px;
+  color: #666;
+  margin: 8px 0 12px;
+  max-height: 3.2em; /* clamp ~2 lines */
+  overflow: hidden;
+}
+.post-item .price {
+  font-size: 15px;
+  font-weight: 700;
+  color: #0b6623;
+}
+
 .product-item:hover {
   box-shadow: 0px 21px 44px rgba(0, 0, 0, 0.08);
 }
@@ -571,6 +701,34 @@ h6,
   width: 100%;
   height: 100%;
   object-fit: contain;
+}
+
+/* Compact variant: smaller thumbnails and tighter cards for 'Bài viết mới' */
+.product-item.compact {
+  padding: 10px;
+  margin-bottom: 16px;
+  border-radius: 10px;
+}
+.product-item.compact figure {
+  height: 140px; /* smaller thumbnail height */
+  border-radius: 8px;
+}
+.product-item.compact figure img {
+  object-fit: cover; /* crop to fill thumbnail */
+}
+.product-item.compact h3 {
+  font-size: 15px;
+  margin: 0.4rem 0;
+}
+.product-item.compact .price {
+  font-size: 16px;
+}
+
+/* Optionally show 4 columns on wide screens for compact view */
+@media (min-width: 1200px) {
+  .products-compact-row .col-md-3 {
+    display: block;
+  }
 }
 
 /* Product info */
@@ -834,6 +992,24 @@ h6,
   font-size: 18px; /* fallback for icon fonts */
 }
 
+/* === Hide cart and quantity controls site-wide (non-destructive) === */
+/* Use this to remove cart icons and quantity selectors from product cards */
+.qty-cart-wrapper,
+.product-qty,
+.qty-cart-wrapper a.nav-link,
+.product-item a.nav-link .cart-icon,
+.cart-icon {
+  display: none !important;
+  visibility: hidden !important;
+}
+
+/* Also hide any quantity +/- buttons created by JS */
+.quantity-left-minus,
+.quantity-right-plus,
+.input-number {
+  display: none !important;
+}
+
 /* ==========================================================================
    13. RESPONSIVE
    ========================================================================== */
@@ -876,6 +1052,67 @@ h6,
     margin-top: 20px;
     height: auto;
   }
+}
+
+/* ==========================================================================
+   15. SEARCH RESULTS CARD FIXED SIZE
+   - Ensure consistent card size inside the search swiper
+   ========================================================================== */
+#search-results-section .swiper-slide {
+  /* Let Swiper manage slide width; focus on card height */
+  height: auto !important;
+}
+
+#search-results-section .product-item {
+  /* Fixed card height for consistency */
+  height: 320px !important;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  overflow: hidden;
+}
+
+#search-results-section .product-item figure {
+  height: 160px !important; /* fixed thumbnail area */
+}
+
+#search-results-section .product-item figure img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* fill and crop for uniform look */
+}
+
+#search-results-section .product-item h3.product-name {
+  font-size: 16px;
+  margin: 8px 0 4px;
+  line-height: 1.4;
+  line-clamp: 2;
+  display: -webkit-box;
+  -webkit-line-clamp: 2; /* clamp to 2 lines */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+#search-results-section .product-item .card-text {
+  font-size: 13px;
+  color: #6c757d;
+  margin-bottom: 6px;
+  line-clamp: 2;
+  display: -webkit-box;
+  -webkit-line-clamp: 2; /* clamp to 2 lines */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+#search-results-section .product-item .price {
+  margin-top: auto; /* push price to bottom */
+  font-size: 16px;
+}
+
+/* Ensure the swiper container doesn't constrain height unexpectedly */
+#search-results-section .swiper {
+  height: auto !important;
+  overflow: visible;
 }
 
 @media (min-width: 992px) {
