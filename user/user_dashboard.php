@@ -127,8 +127,10 @@ $approved = $conn->query("SELECT COUNT(*) as c FROM products WHERE seller_id = $
                         $stt = $row['status'] == 'pending' ? '<span class="badge bg-warning text-dark">Chờ duyệt</span>' : 
                                ($row['status'] == 'approved' ? '<span class="badge bg-success">Đã duyệt</span>' : '<span class="badge bg-danger">Từ chối</span>');
                         
-                        // Xử lý ảnh
-                        $img_url = !empty($row['image']) ? '../' . $row['image'] : 'https://via.placeholder.com/50';
+                        // Lấy ảnh từ bảng product_images
+                        $img_query = $conn->query("SELECT filename FROM product_images WHERE product_id = " . $row['id'] . " LIMIT 1");
+                        $img_row = $img_query->fetch_assoc();
+                        $img_url = ($img_row && !empty($img_row['filename'])) ? '../' . $img_row['filename'] : 'https://via.placeholder.com/50';
 
                         echo "<tr>";
                         echo "<td><img src='$img_url' width='50' height='50' class='rounded border'></td>";

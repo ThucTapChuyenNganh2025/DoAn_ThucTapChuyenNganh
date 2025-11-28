@@ -24,12 +24,23 @@ if(isset($_POST['btn_dangtin'])) {
     $db_image_path = "uploads/" . time() . "_" . $file_name;
 
     if(move_uploaded_file($_FILES["image"]["tmp_name"], $target_file)) {
-        // Lưu vào DB
-        $sql = "INSERT INTO products (seller_id, category_id, title, description, price, image, status) 
-                VALUES ('$seller_id', '$cate_id', '$title', '$desc', '$price', '$db_image_path', 'pending')";
+        // Lưu sản phẩm vào DB
+        $sql = "INSERT INTO products (seller_id, category_id, title, description, price, status) 
+                VALUES ('$seller_id', '$cate_id', '$title', '$desc', '$price', 'pending')";
         
         if($conn->query($sql) === TRUE) {
-            echo "<script>alert('Đăng tin thành công!'); window.location.href='user_dashboard.php';</script>";
+            // Lấy ID sản phẩm vừa tạo
+            $product_id = $conn->insert_id;
+            
+            // Lưu ảnh vào bảng product_images
+            $sql_image = "INSERT INTO product_images (product_id, filename, sort_order) 
+                          VALUES ('$product_id', '$db_image_path', '0')";
+            
+            if($conn->query($sql_image) === TRUE) {
+                echo "<script>alert('Đăng tin thành công!'); window.location.href='user_dashboard.php';</script>";
+            } else {
+                echo "Lỗi lưu ảnh: " . $conn->error;
+            }
         } else {
             echo "Lỗi DB: " . $conn->error;
         }

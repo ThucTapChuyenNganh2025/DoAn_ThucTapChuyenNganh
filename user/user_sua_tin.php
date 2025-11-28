@@ -33,9 +33,6 @@ if (isset($_POST['btn_update'])) {
     $price = $_POST['price'];
     $desc = $conn->real_escape_string($_POST['description']);
     $cate_id = $_POST['category_id'];
-    
-    // Giữ ảnh cũ
-    $image_db = $row['image']; 
 
     // Nếu có upload ảnh mới
     if (isset($_FILES['image']) && $_FILES['image']['error'] == 0) {
@@ -46,16 +43,20 @@ if (isset($_POST['btn_update'])) {
         if (move_uploaded_file($_FILES["image"]["tmp_name"], $target_file)) {
             $image_db = "uploads/" . $file_name;
             
-            // Xóa ảnh cũ (nếu cần)
-            if(!empty($row['image']) && file_exists("../".$row['image'])) {
-                unlink("../".$row['image']);
-            }
+            // Xóa ảnh cũ từ product_images
+            $sql_delete_old = "DELETE FROM product_images WHERE product_id = $id";
+            $conn->query($sql_delete_old);
+            
+            // Thêm ảnh mới vào product_images
+            $sql_insert_image = "INSERT INTO product_images (product_id, filename, sort_order) 
+                                 VALUES ('$id', '$image_db', '0')";
+            $conn->query($sql_insert_image);
         }
     }
 
-    // Cập nhật
+    // Cập nhật thông tin sản phẩm (không có cột image)
     $sql_update = "UPDATE products 
-                   SET title='$title', price='$price', description='$desc', category_id='$cate_id', image='$image_db', status='pending' 
+                   SET title='$title', price='$price', description='$desc', category_id='$cate_id', status='pending' 
                    WHERE id=$id AND seller_id=$my_id";
 
     if ($conn->query($sql_update) === TRUE) {
@@ -166,7 +167,11 @@ if (isset($_POST['btn_update'])) {
                     <div class="mb-3">
                         <label class="fw-bold mb-2">Ảnh hiện tại</label><br>
                         <?php 
-                            $img_src = !empty($row['image']) ? '../' . $row['image'] : 'https://via.placeholder.com/300x300?text=No+Image';
+                            // Lấy ảnh từ bảng product_images
+                            $sql_img = "SELECT filename FROM product_images WHERE product_id = $id LIMIT 1";
+                            $res_img = $conn->query($sql_img);
+                            $img_row = $res_img->fetch_assoc();
+                            $img_src = ($img_row && !empty($img_row['filename'])) ? '../' . $img_row['filename'] : 'https://via.placeholder.com/300x300?text=No+Image';
                         ?>
                         <div class="text-center border rounded p-2 bg-light">
                             <img src="<?php echo $img_src; ?>" class="img-fluid rounded" style="max-height: 250px; object-fit: cover;">
