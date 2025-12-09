@@ -10,7 +10,7 @@ if (!isset($_SESSION['admin_id'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard - Trang Chủ</title>
+    <title>Admin Dashboard - Duyệt Tin</title>
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -21,7 +21,7 @@ if (!isset($_SESSION['admin_id'])) {
     <style>
         body { background-color: #f0f2f5; font-family: 'Nunito', sans-serif; overflow-x: hidden; }
         
-        /* --- SIDEBAR CHUẨN (Đồng bộ) --- */
+        /* Sidebar Pro */
         .sidebar {
             height: 100vh; width: 260px; position: fixed; top: 0; left: 0;
             background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%);
@@ -36,18 +36,16 @@ if (!isset($_SESSION['admin_id'])) {
             border-left: 4px solid transparent;
         }
         
-        /* Cố định chiều rộng icon để thẳng hàng */
         .sidebar i { width: 35px; min-width: 35px; text-align: center; margin-right: 10px; font-size: 18px; }
 
         .sidebar a:hover, .sidebar a.active {
             background-color: rgba(255,255,255,0.05); color: #fff; border-left: 4px solid #4e73df;
         }
         
-        /* LOGO THƯƠNG HIỆU CHUẨN */
         .sidebar .brand {
             text-align: center; font-size: 24px; font-weight: 900; margin-bottom: 30px;
             color: #ffffff !important; text-transform: uppercase; letter-spacing: 1px;
-            text-shadow: 0px 2px 4px rgba(0,0,0,0.5); /* Bóng đổ chữ */
+            text-shadow: 0px 2px 4px rgba(0,0,0,0.5);
         }
         
         .logout-btn {
@@ -75,7 +73,11 @@ if (!isset($_SESSION['admin_id'])) {
         .bg-gradient-3 { background: linear-gradient(45deg, #f6c23e, #dda20a); color: #fff; }
         .bg-gradient-4 { background: linear-gradient(45deg, #e74a3b, #be2617); }
 
-        .card-custom { background: white; border: none; border-radius: 15px; box-shadow: 0 0 20px rgba(0,0,0,0.05); overflow: hidden; }
+        .card-custom {
+            background: white; border: none; border-radius: 15px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.05); overflow: hidden;
+            border-top: 4px solid #ff9f43; /* Màu cam cho trang duyệt tin */
+        }
         
         @media (max-width: 768px) {
             .sidebar { left: -260px; }
@@ -187,7 +189,7 @@ if (!isset($_SESSION['admin_id'])) {
                         <th>Sản Phẩm</th>
                         <th>Giá Bán</th>
                         <th>Người Bán</th>
-                        <th>Thao Tác</th>
+                        <th class="text-center">Hành Động</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -208,9 +210,16 @@ if (!isset($_SESSION['admin_id'])) {
                             echo "<td class='fw-bold text-primary'>" . $row["title"] . "</td>";
                             echo "<td class='text-danger fw-bold'>" . number_format($row["price"]) . " đ</td>";
                             echo "<td><div class='d-flex align-items-center'><div class='rounded-circle bg-light d-flex justify-content-center align-items-center me-2' style='width:30px;height:30px;font-weight:bold'>" . substr($row['seller_name'],0,1) . "</div>" . $row["seller_name"] . "</div></td>";
-                            echo "<td>
-                                    <button onclick=\"confirmAction('approve', " . $row['id'] . ")\" class='btn btn-sm btn-success shadow-sm px-3 rounded-pill me-1'><i class='fa-solid fa-check'></i> Duyệt</button>
-                                    <button onclick=\"confirmAction('reject', " . $row['id'] . ")\" class='btn btn-sm btn-danger shadow-sm px-3 rounded-pill'><i class='fa-solid fa-xmark'></i> Xóa</button>
+                            
+                            // --- CẬP NHẬT NÚT BẤM DUYỆT & TỪ CHỐI TẠI ĐÂY ---
+                            echo "<td class='text-center'>
+                                    <button onclick=\"confirmAction('approve', " . $row['id'] . ")\" class='btn btn-sm btn-success shadow-sm px-3 rounded-pill me-2'>
+                                        <i class='fa-solid fa-check me-1'></i> Duyệt
+                                    </button>
+                                    
+                                    <button onclick=\"confirmAction('reject', " . $row['id'] . ")\" class='btn btn-sm btn-danger shadow-sm px-3 rounded-pill'>
+                                        <i class='fa-solid fa-xmark me-1'></i> Từ chối
+                                    </button>
                                   </td>";
                             echo "</tr>";
                         }
@@ -235,7 +244,7 @@ if (!isset($_SESSION['admin_id'])) {
 
     $(document).ready(function () {
         $('#dataTable').DataTable({
-            language: { search: "Tìm nhanh:", lengthMenu: "Hiện _MENU_ dòng", info: "Trang _PAGE_ / _PAGES_", paginate: { first: "First", last: "Last", next: ">", previous: "<" } },
+            language: { search: "Tìm nhanh:", lengthMenu: "Hiện _MENU_ dòng", info: "Trang _PAGE_ / _PAGES_", paginate: { first: "First", last: "Last", next: ">", previous: "<" }, zeroRecords: "Không có tin nào chờ duyệt!" },
             pageLength: 5
         });
     });
@@ -255,15 +264,25 @@ if (!isset($_SESSION['admin_id'])) {
         options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
     });
 
+    // HÀM XỬ LÝ SỰ KIỆN NÚT BẤM (SWEETALERT2)
     function confirmAction(action, id) {
+        let titleText = action === 'approve' ? 'Duyệt tin đăng này?' : 'Từ chối tin đăng này?';
+        let btnText = action === 'approve' ? 'Duyệt ngay' : 'Từ chối';
+        let btnColor = action === 'approve' ? '#28a745' : '#d33';
+        let iconType = action === 'approve' ? 'question' : 'warning';
+
         Swal.fire({
-            title: action === 'approve' ? 'Duyệt tin này?' : 'Xóa tin này?',
-            icon: action === 'approve' ? 'question' : 'warning',
+            title: titleText,
+            text: "Trạng thái sản phẩm sẽ được cập nhật!",
+            icon: iconType,
             showCancelButton: true,
-            confirmButtonColor: action === 'approve' ? '#28a745' : '#d33',
-            confirmButtonText: 'Đồng ý!'
+            confirmButtonColor: btnColor,
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: btnText,
+            cancelButtonText: 'Hủy'
         }).then((result) => {
             if (result.isConfirmed) {
+                // Chuyển hướng sang API xử lý
                 window.location.href = `../api/xuly_duyet.php?id=${id}&action=${action}`;
             }
         })
