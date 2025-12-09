@@ -1,19 +1,11 @@
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Đăng nhập users</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-
-<body>
-    <?php
+<?php
 session_start();
 include '../config/connect.php';
 
-if (isset($_POST['login_user'])) {
+$error = '';
+$requested_next = isset($_GET['next']) ? trim($_GET['next']) : '';
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login_user'])) {
     $email = trim($_POST['email']);
     $password = $_POST['password'];
 
@@ -29,22 +21,65 @@ if (isset($_POST['login_user'])) {
             // Đăng nhập thành công
             $_SESSION['user_id'] = $user['id'];
             $_SESSION['user_name'] = $user['name'];
-            header('location: index.php');
+
+            // Tạo URL redirect an toàn: đặt mặc định về index của project (không phải root server)
+            $script = $_SERVER['SCRIPT_NAME'];
+            $projectRoot = dirname(dirname($script)); // e.g. /DoAn_ThucTapChuyenNganh
+            if ($projectRoot === '/' || $projectRoot === '\\') {
+                $projectRoot = '';
+            }
+            $next = $projectRoot . '/index.php';
+
+            if ($requested_next !== '') {
+                $candidate = $requested_next;
+                // Kiểm tra không chứa scheme/host để tránh open redirect
+                if (strpos($candidate, '://') === false && strpos($candidate, '//') === false && strpos($candidate, 'http') === false) {
+                    if (strpos($candidate, '/') === 0) {
+                        // Nếu bắt đầu bằng '/', hiểu là đường dẫn trong server; prepend project root nếu cần
+                        if (strpos($candidate, $projectRoot) === 0) {
+                            $next = $candidate;
+                        } else {
+                            $next = $projectRoot . $candidate;
+                        }
+                    } else {
+                        // Bình thường, tạo đường dẫn dựa trên thư mục của script hiện tại
+                        $base = dirname($script); // e.g. /DoAn_ThucTapChuyenNganh/user
+                        $next = $base . '/' . $candidate; // => /DoAn_ThucTapChuyenNganh/user/user_dangtin.php
+                    }
+                }
+            }
+
+            header('Location: ' . $next);
             exit;
         } else {
-            echo '<div class="alert alert-danger text-center">Sai mật khẩu!</div>';
+            $error = 'Sai mật khẩu!';
         }
     } else {
-        echo '<div class="alert alert-danger text-center">Email không tồn tại!</div>';
+        $error = 'Email không tồn tại!';
     }
     $stmt->close();
 }
 ?>
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng nhập users</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body>
     <div class="d-flex justify-content-center align-items-center" style="min-height:100vh; background:#ffffff;">
         <div class="card shadow-lg border-0" style="width: 400px;">
             <div class="card-body">
                 <h3 class="text-center text-danger fw-bold mb-4"> Đăng nhập User</h3>
-                <form method="post" action="dangnhap.php">
+                <?php if ($error): ?>
+                    <div class="alert alert-danger text-center"><?php echo htmlspecialchars($error, ENT_QUOTES, 'UTF-8'); ?></div>
+                <?php endif; ?>
+                <form method="post" action="dangnhap.php<?php echo $requested_next ? '?next=' . urlencode($requested_next) : ''; ?>">
                     <div class="mb-3">
                         <label class="form-label fw-bold text-danger">Email</label>
                         <input type="email" name="email" class="form-control" placeholder="Nhập email..." required>

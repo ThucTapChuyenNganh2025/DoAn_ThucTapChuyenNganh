@@ -201,7 +201,8 @@ if (!isset($_SESSION['admin_id'])) {
                 </thead>
                 <tbody>
                     <?php
-                    $sql = "SELECT products.*, users.name as seller_name 
+                        $sql = "SELECT products.*, users.name as seller_name,
+                            (SELECT filename FROM product_images WHERE product_id = products.id ORDER BY sort_order ASC LIMIT 1) AS thumb
                             FROM products 
                             JOIN users ON products.seller_id = users.id";
 
@@ -223,7 +224,7 @@ if (!isset($_SESSION['admin_id'])) {
                             elseif($row['status'] == 'rejected') $statusBadge = '<span class="badge bg-danger rounded-pill px-3"><i class="fa-solid fa-ban"></i> Từ Chối</span>';
                             else $statusBadge = '<span class="badge bg-secondary rounded-pill px-3">Ẩn</span>';
 
-                            $img_src = !empty($row['image']) ? '../' . $row['image'] : 'https://via.placeholder.com/50';
+                            $img_src = !empty($row['thumb']) ? '../' . $row['thumb'] : 'https://via.placeholder.com/50';
 
                             echo "<tr>";
                             echo "<td class='text-center fw-bold text-muted'>#" . $row["id"] . "</td>";

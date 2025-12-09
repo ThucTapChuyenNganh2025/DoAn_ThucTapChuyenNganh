@@ -50,7 +50,6 @@ if (isset($_POST['btn_update'])) {
         $target_file = $target_dir . $file_name;
 
         if (move_uploaded_file($_FILES["image"]["tmp_name"], $target_file)) {
-
             $new_path = "uploads/" . $file_name;
 
             // Lấy ảnh cũ để xóa file cũ
@@ -59,21 +58,15 @@ if (isset($_POST['btn_update'])) {
             }
 
             // Cập nhật filename trong product_images
-            $conn->query("
-                UPDATE product_images 
-                SET filename='$new_path' 
-                WHERE product_id=$id 
-                ORDER BY sort_order ASC LIMIT 1
-            ");
+            $sql_up = "UPDATE product_images SET filename='$new_path' WHERE product_id=$id ORDER BY sort_order ASC LIMIT 1";
+            $conn->query($sql_up);
+        } else {
+            // Nếu không upload ảnh mới, không làm gì
         }
     }
 
-    // Cập nhật thông tin sản phẩm (KHÔNG UPDATE IMAGE)
-    $sql_update = "
-        UPDATE products 
-        SET title='$title', price='$price', description='$desc', category_id='$cate_id', status='pending'
-        WHERE id=$id AND seller_id=$my_id
-    ";
+    // Cập nhật thông tin sản phẩm (không cập nhật cột image vì không tồn tại)
+    $sql_update = "UPDATE products SET title='$title', price='$price', description='$desc', category_id='$cate_id', status='pending' WHERE id=$id AND seller_id=$my_id";
 
     if ($conn->query($sql_update) === TRUE) {
         echo "<script>
@@ -87,86 +80,79 @@ if (isset($_POST['btn_update'])) {
 
 ?>
 
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <title>Sửa Tin Đăng</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        body { background-color: #f4f6f9; font-family: 'Segoe UI', sans-serif; }
-        .sidebar { height: 100vh; width: 250px; position: fixed; top: 0; left: 0; background: #fff; border-right: 1px solid #ddd; padding-top: 20px; }
-        .sidebar a { padding: 15px 25px; font-size: 16px; color: #555; display: block; text-decoration: none; }
-        .sidebar a:hover, .sidebar a.active { background: #fff3cd; color: #ff9f43; border-left: 4px solid #ff9f43; }
-        .main-content { margin-left: 250px; padding: 30px; }
-        .card-custom { border: none; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border-top: 5px solid #ff9f43; }
-        .btn-cam { background-color: #ff9f43; color: white; }
-    </style>
-</head>
-<body>
+<?php include_once dirname(__DIR__) . '/includes/header.php'; ?>
 
-<!-- Sidebar -->
-<div class="sidebar">
-    <div class="brand text-center fw-bold fs-4 text-warning"><i class="fa-solid fa-store"></i> KÊNH NGƯỜI BÁN</div>
-    <a href="user_dashboard.php" class="active"><i class="fa-solid fa-gauge me-2"></i> Tổng Quan</a>
-    <a href="user_dangtin.php"><i class="fa-solid fa-pen-to-square me-2"></i> Đăng Tin Mới</a>
-    <a href="user_quanlytin.php"><i class="fa-solid fa-list me-2"></i> Tin Đã Đăng</a>
-</div>
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-lg-3 d-none d-lg-block">
+            <aside class="seller-aside">
+                <div class="text-center mb-3 brand"><i class="fa-solid fa-store me-2"></i>Đăng Tin</div>
+                <ul class="list-unstyled">
+                    <li><a href="user_dashboard.php">Tổng Quan</a></li>
+                    <li><a href="user_dangtin.php">Đăng Tin</a></li>
+                    <li><a href="user_quanlytin.php">Tin Đã Đăng</a></li>
+                </ul>
+            </aside>
+        </div>
 
-<div class="main-content">
-    <h3 class="mb-4 text-secondary">Chỉnh Sửa Tin Đăng</h3>
+        <div class="col-lg-9">
+            <h3 class="mb-4 text-secondary">Chỉnh Sửa Tin Đăng</h3>
 
-    <div class="card card-custom p-4">
-        <h4 class="mb-3 text-warning"><i class="fa-solid fa-pen-to-square"></i> Cập Nhật Thông Tin</h4>
+            <div class="card card-custom p-4">
+                <h4 class="mb-3 text-warning"><i class="fa-solid fa-pen-to-square"></i> Cập Nhật Thông Tin</h4>
 
-        <form method="POST" enctype="multipart/form-data">
-            <div class="row">
-                <div class="col-md-8">
+                <form method="POST" enctype="multipart/form-data">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <label class="fw-bold">Tiêu đề</label>
+                            <input type="text" name="title" class="form-control" required value="<?php echo htmlspecialchars($row['title'], ENT_QUOTES, 'UTF-8'); ?>">
 
-                    <label class="fw-bold">Tiêu đề</label>
-                    <input type="text" name="title" class="form-control mb-3" required value="<?php echo $row['title']; ?>">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="fw-bold">Giá bán (VNĐ)</label>
+                                    <input type="number" name="price" class="form-control" required value="<?php echo htmlspecialchars($row['price'], ENT_QUOTES, 'UTF-8'); ?>" min="1000" step="1000">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="fw-bold">Danh mục</label>
+                                    <select name="category_id" class="form-select" required>
+                                        <?php
+                                        $cats = $conn->query("SELECT * FROM categories");
+                                        while($c = $cats->fetch_assoc()) {
+                                            $selected = ($c['id'] == $row['category_id']) ? 'selected' : '';
+                                            echo "<option value='".$c['id']."' $selected>".htmlspecialchars($c['name'])."</option>";
+                                        }
+                                        ?>
+                                    </select>
+                                </div>
+                            </div>
 
-                    <label class="fw-bold">Giá bán (VNĐ)</label>
-                    <input type="number" name="price" class="form-control mb-3" required value="<?php echo $row['price']; ?>">
+                            <label class="fw-bold">Mô tả</label>
+                            <textarea name="description" class="form-control" rows="6"><?php echo htmlspecialchars($row['description'], ENT_QUOTES, 'UTF-8'); ?></textarea>
 
-                    <label class="fw-bold">Danh mục</label>
-                    <select name="category_id" class="form-select mb-3" required>
-                        <?php
-                        $cats = $conn->query("SELECT * FROM categories");
-                        while($c = $cats->fetch_assoc()) {
-                            $sel = ($c['id'] == $row['category_id']) ? 'selected' : '';
-                            echo "<option value='{$c['id']}' $sel>{$c['name']}</option>";
-                        }
-                        ?>
-                    </select>
+                        </div>
 
-                    <label class="fw-bold">Mô tả</label>
-                    <textarea name="description" class="form-control mb-3" rows="6"><?php echo $row['description']; ?></textarea>
+                        <div class="col-md-4">
+                            <label class="fw-bold mb-2">Ảnh hiện tại</label>
+                            <div class="border rounded p-2 bg-light text-center">
+                                <img src="<?php echo $img_src; ?>" class="img-fluid rounded" style="max-height:250px; object-fit:cover;">
+                            </div>
 
-                </div>
-
-                <div class="col-md-4">
-                    <label class="fw-bold mb-2">Ảnh hiện tại</label>
-                    <div class="border rounded p-2 bg-light text-center">
-                        <img src="<?php echo $img_src; ?>" class="img-fluid rounded" style="max-height:250px; object-fit:cover;">
+                            <label class="fw-bold mt-3">Thay ảnh mới</label>
+                            <input type="file" name="image" class="form-control mt-1">
+                            <small class="text-muted">Để trống nếu giữ ảnh cũ.</small>
+                        </div>
                     </div>
 
-                    <label class="fw-bold mt-3">Thay ảnh mới</label>
-                    <input type="file" name="image" class="form-control mt-1">
-                    <small class="text-muted">Để trống nếu giữ ảnh cũ.</small>
-                </div>
-            </div>
+                    <div class="mt-4 text-end">
+                        <button type="submit" name="btn_update" class="btn btn-cam px-4 py-2">
+                            <i class="fa-solid fa-floppy-disk me-2"></i> Lưu Thay Đổi
+                        </button>
+                    </div>
 
-            <div class="mt-4 text-end">
-                <button type="submit" name="btn_update" class="btn btn-cam px-4 py-2">
-                    <i class="fa-solid fa-floppy-disk me-2"></i> Lưu Thay Đổi
-                </button>
+                </form>
             </div>
-
-        </form>
+        </div>
     </div>
 </div>
 
-</body>
-</html>
+<?php include_once dirname(__DIR__) . '/includes/footer.php'; ?>

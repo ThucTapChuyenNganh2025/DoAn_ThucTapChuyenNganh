@@ -10,8 +10,10 @@ if (!isset($_SESSION['user_id'])) {
 
 $seller_id = $_SESSION['user_id'];
 
+// Kiểm tra tham số
 if (!isset($_GET['id'])) {
-    die("Không có ID sản phẩm");
+    header("Location: user_quanlytin.php");
+    exit;
 }
 
 $product_id = intval($_GET['id']);
@@ -20,7 +22,7 @@ $product_id = intval($_GET['id']);
 $check_sql = "SELECT id FROM products WHERE id = $product_id AND seller_id = $seller_id";
 $check = $conn->query($check_sql);
 
-if ($check->num_rows == 0) {
+if (!$check || $check->num_rows == 0) {
     echo "<script>alert('Bạn không có quyền xoá sản phẩm này!'); window.location.href='user_quanlytin.php';</script>";
     exit;
 }
@@ -30,11 +32,12 @@ $sql_img = "SELECT filename FROM product_images WHERE product_id = $product_id";
 $imgs = $conn->query($sql_img);
 
 // 3) Xoá file ảnh thật trên server
-while ($row = $imgs->fetch_assoc()) {
-    $path = "../" . $row['filename']; // VD: ../uploads/xxxxx.jpg
-
-    if (file_exists($path)) {
-        unlink($path);
+if ($imgs && $imgs->num_rows > 0) {
+    while ($row = $imgs->fetch_assoc()) {
+        $path = "../" . $row['filename']; // VD: ../uploads/xxxxx.jpg
+        if (file_exists($path)) {
+            @unlink($path);
+        }
     }
 }
 

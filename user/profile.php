@@ -56,7 +56,7 @@ $stmt->close();
                         <div class="d-flex justify-content-between mt-4">
                             <a href="update_profile.php" class="btn btn-danger">Cập nhật hồ sơ</a>
                             <a href="doimk.php" class="btn btn-danger text-white">Đổi mật khẩu</a>
-                            <a href="index.php" class="btn btn-danger">Về trang chủ</a>
+                            <a href="../index.php" class="btn btn-danger">Về trang chủ</a>
                         </div>
 
                     </form>
