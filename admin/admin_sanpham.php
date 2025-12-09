@@ -235,9 +235,7 @@ if (!isset($_SESSION['admin_id'])) {
                             echo "<td>" . $statusBadge . "</td>";
                             
                             echo "<td class='text-center'>
-                                    <a href='admin_sua_sanpham.php?id=" . $row["id"] . "' class='btn btn-sm btn-outline-primary shadow-sm me-1 rounded-circle' style='width:32px;height:32px;padding:0;line-height:30px' title='Sửa tin'>
-                                        <i class='fa-solid fa-pen'></i>
-                                    </a>
+                                    
                                     
                                     <button onclick=\"confirmDelete(" . $row["id"] . ")\" class='btn btn-sm btn-outline-danger shadow-sm rounded-circle' style='width:32px;height:32px;padding:0;line-height:30px' title='Xóa tin'>
                                         <i class='fa-solid fa-trash'></i>
