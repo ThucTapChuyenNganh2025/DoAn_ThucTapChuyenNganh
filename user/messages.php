@@ -11,6 +11,35 @@ if (!isset($_SESSION['user_id'])) {
 $user_id = (int)$_SESSION['user_id'];
 $user_name = $_SESSION['name'] ?? 'Bạn';
 $BASE_PATH = '/DoAn_ThucTapChuyenNganh';
+
+// Lấy thông tin từ URL nếu có (để mở chat trực tiếp)
+$direct_product_id = isset($_GET['product_id']) ? (int)$_GET['product_id'] : 0;
+$direct_user_id = isset($_GET['user_id']) ? (int)$_GET['user_id'] : 0;
+$direct_chat_info = null;
+
+if ($direct_product_id > 0 && $direct_user_id > 0 && $direct_user_id != $user_id) {
+    // Lấy thông tin sản phẩm và người dùng
+    $info_sql = "SELECT p.id, p.title, 
+                        (SELECT pi.filename FROM product_images pi WHERE pi.product_id = p.id ORDER BY pi.sort_order ASC LIMIT 1) AS image,
+                        u.id AS other_user_id, u.name AS other_user_name
+                 FROM products p
+                 LEFT JOIN users u ON u.id = ?
+                 WHERE p.id = ?";
+    $info_stmt = $conn->prepare($info_sql);
+    $info_stmt->bind_param('ii', $direct_user_id, $direct_product_id);
+    $info_stmt->execute();
+    $info_res = $info_stmt->get_result();
+    if ($info_row = $info_res->fetch_assoc()) {
+        $direct_chat_info = [
+            'product_id' => (int)$info_row['id'],
+            'product_title' => $info_row['title'],
+            'product_image' => $info_row['image'] ? 'uploads/' . $info_row['image'] : 'images/default-product.jpg',
+            'other_user_id' => (int)$info_row['other_user_id'],
+            'other_user_name' => $info_row['other_user_name']
+        ];
+    }
+    $info_stmt->close();
+}
 ?>
 <!DOCTYPE html>
 <html lang="vi">
@@ -948,17 +977,75 @@ function timeAgo(dateStr) {
 document.addEventListener('DOMContentLoaded', function() {
   loadConversations();
   
-  const urlParams = new URLSearchParams(window.location.search);
-  const productId = urlParams.get('product_id');
-  const userId = urlParams.get('user_id');
+  // Kiểm tra nếu có direct chat info từ PHP
+  const directChatInfo = <?php echo $direct_chat_info ? json_encode($direct_chat_info) : 'null'; ?>;
   
-  if (productId && userId) {
+  if (directChatInfo) {
+    // Mở chat trực tiếp với thông tin từ URL
     setTimeout(() => {
-      const item = document.querySelector(`.conv-item[data-product-id="${productId}"][data-other-user-id="${userId}"]`);
-      if (item) selectConversation(item);
-    }, 500);
+      openDirectChat(directChatInfo);
+    }, 300);
   }
 });
+
+// Mở chat trực tiếp (khi click từ trang sản phẩm)
+function openDirectChat(info) {
+  activeConversation = {
+    product_id: info.product_id,
+    other_user_id: info.other_user_id,
+    other_user_name: info.other_user_name,
+    product_title: info.product_title,
+    product_image: info.product_image
+  };
+  
+  lastMessageId = 0;
+  
+  document.getElementById('emptyState').style.display = 'none';
+  document.getElementById('chatContent').style.display = 'flex';
+  
+  if (window.innerWidth <= 768) {
+    document.getElementById('msgSidebar').classList.add('hidden');
+  }
+  
+  const initial = (activeConversation.other_user_name || '?').charAt(0).toUpperCase();
+  document.getElementById('chatHeader').innerHTML = `
+    <button class="mobile-back-btn btn-icon" onclick="showSidebar()" style="margin-right:12px;">
+      <i class="fa-solid fa-arrow-left"></i>
+    </button>
+    <div class="chat-header-avatar">${initial}</div>
+    <div class="chat-header-info">
+      <h5>${escapeHtml(activeConversation.other_user_name)}</h5>
+      <small>
+        <i class="fa-solid fa-box me-1"></i>
+        <a href="${basePath}/product.php?id=${activeConversation.product_id}" target="_blank">
+          ${escapeHtml(activeConversation.product_title)}
+        </a>
+      </small>
+    </div>
+    <div class="chat-header-actions">
+      <a href="${basePath}/product.php?id=${activeConversation.product_id}" target="_blank" class="btn-icon" title="Xem sản phẩm">
+        <i class="fa-solid fa-external-link"></i>
+      </a>
+    </div>
+  `;
+  
+  loadMessages();
+  
+  if (pollingInterval) clearInterval(pollingInterval);
+  pollingInterval = setInterval(pollNewMessages, 3000);
+  
+  // Highlight trong sidebar nếu có
+  setTimeout(() => {
+    const item = document.querySelector(`.conv-item[data-product-id="${activeConversation.product_id}"][data-other-user-id="${activeConversation.other_user_id}"]`);
+    if (item) {
+      document.querySelectorAll('.conv-item').forEach(i => i.classList.remove('active'));
+      item.classList.add('active');
+      item.classList.remove('unread');
+      const badge = item.querySelector('.conv-badge');
+      if (badge) badge.remove();
+    }
+  }, 500);
+}
 
 window.addEventListener('beforeunload', function() {
   if (pollingInterval) clearInterval(pollingInterval);

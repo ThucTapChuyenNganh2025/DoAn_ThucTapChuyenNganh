@@ -265,110 +265,6 @@ if (isset($_SESSION['user_id'])) {
   color: #555;
 }
 
-/* Chat Box Styles */
-.chat-box {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  width: 350px;
-  max-width: 90vw;
-  background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 5px 30px rgba(0,0,0,0.2);
-  display: none;
-  z-index: 9999;
-  overflow: hidden;
-}
-.chat-header {
-  background: linear-gradient(135deg, #0d6efd, #0a58ca);
-  color: #fff;
-  padding: 15px;
-  font-weight: 600;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-.chat-header .btn-close-chat {
-  background: rgba(255,255,255,0.2);
-  border: none;
-  color: #fff;
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  font-size: 18px;
-}
-.chat-header .btn-close-chat:hover {
-  background: rgba(255,255,255,0.3);
-}
-.chat-body {
-  height: 300px;
-  overflow-y: auto;
-  padding: 15px;
-  background: #f8f9fa;
-}
-.chat-message {
-  margin-bottom: 12px;
-  padding: 10px 14px;
-  border-radius: 12px;
-  max-width: 85%;
-  word-wrap: break-word;
-}
-.chat-message.system {
-  background: #e9ecef;
-  color: #666;
-  font-size: 13px;
-  text-align: center;
-  max-width: 100%;
-  font-style: italic;
-}
-.chat-message.user {
-  background: linear-gradient(135deg, #0d6efd, #0a58ca);
-  color: #fff;
-  margin-left: auto;
-}
-.chat-message.seller {
-  background: #fff;
-  border: 1px solid #e0e0e0;
-}
-.chat-footer {
-  padding: 15px;
-  border-top: 1px solid #eee;
-  display: flex;
-  gap: 10px;
-}
-.chat-footer textarea {
-  flex: 1;
-  border: 1px solid #ddd;
-  border-radius: 20px;
-  padding: 10px 15px;
-  resize: none;
-  height: 42px;
-  font-size: 14px;
-}
-.chat-footer textarea:focus {
-  outline: none;
-  border-color: #0d6efd;
-}
-.chat-footer .btn-send {
-  width: 42px;
-  height: 42px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #0d6efd, #0a58ca);
-  color: #fff;
-  border: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-}
-.chat-footer .btn-send:hover {
-  background: linear-gradient(135deg, #0a58ca, #084298);
-}
-
 @media (max-width: 768px) {
   .main-image {
     height: 280px;
@@ -378,13 +274,6 @@ if (isset($_SESSION['user_id'])) {
   }
   .product-price {
     font-size: 22px;
-  }
-  .chat-box {
-    width: 100%;
-    max-width: none;
-    right: 0;
-    bottom: 0;
-    border-radius: 12px 12px 0 0;
   }
 }
 </style>
@@ -470,9 +359,15 @@ if (isset($_SESSION['user_id'])) {
             </div>
           </div>
           
-          <button class="btn btn-contact btn-chat" id="openChat">
+          <?php if (isset($_SESSION['user_id'])): ?>
+          <a href="<?php echo $BASE_PATH; ?>/user/messages.php?product_id=<?php echo $id; ?>&user_id=<?php echo (int)$p['seller_id']; ?>" class="btn btn-contact btn-chat">
             <i class="fa-regular fa-comment-dots"></i> Chat với người bán
-          </button>
+          </a>
+          <?php else: ?>
+          <a href="<?php echo $BASE_PATH; ?>/user/dangnhap.php" class="btn btn-contact btn-chat">
+            <i class="fa-regular fa-comment-dots"></i> Chat với người bán
+          </a>
+          <?php endif; ?>
           
           <?php if ($sellerPhone): ?>
           <a href="tel:<?php echo $sellerPhone; ?>" class="btn btn-contact btn-phone">
@@ -496,47 +391,8 @@ if (isset($_SESSION['user_id'])) {
   </div>
 </section>
 
-<!-- ================= CHAT BOX THỰC ================= -->
-<div class="chat-box" id="chatBox">
-  <div class="chat-header">
-    <span><i class="fa-regular fa-comment-dots me-2"></i>Chat với <?php echo $sellerName; ?></span>
-    <div style="display:flex;gap:8px;align-items:center;">
-      <a href="<?php echo $BASE_PATH; ?>/user/messages.php?product_id=<?php echo $id; ?>&user_id=<?php echo (int)$p['seller_id']; ?>" 
-         class="btn-close-chat" title="Mở rộng" style="font-size:14px;">
-        <i class="fa-solid fa-expand"></i>
-      </a>
-      <button class="btn-close-chat" id="closeChat">×</button>
-    </div>
-  </div>
-  <div class="chat-body" id="chatBody">
-    <div class="chat-message system">
-      <i class="fa-solid fa-spinner fa-spin me-1"></i> Đang tải tin nhắn...
-    </div>
-  </div>
-  <div class="chat-footer">
-    <textarea id="chatInput" placeholder="Nhập tin nhắn..." rows="1" <?php echo !isset($_SESSION['user_id']) ? 'disabled' : ''; ?>></textarea>
-    <button class="btn-send" id="sendMsg" <?php echo !isset($_SESSION['user_id']) ? 'disabled' : ''; ?>>
-      <i class="fa-solid fa-paper-plane"></i>
-    </button>
-  </div>
-  <?php if (!isset($_SESSION['user_id'])): ?>
-  <div style="padding:10px 15px;background:#fff3cd;text-align:center;font-size:13px;">
-    <a href="<?php echo $BASE_PATH; ?>/user/dangnhap.php">Đăng nhập</a> để gửi tin nhắn
-  </div>
-  <?php endif; ?>
-</div>
-
 <script>
-// Config
-const productId = <?php echo $id; ?>;
-const sellerId = <?php echo (int)$p['seller_id']; ?>;
-const currentUserId = <?php echo isset($_SESSION['user_id']) ? (int)$_SESSION['user_id'] : 0; ?>;
 const basePath = <?php echo json_encode($BASE_PATH); ?>;
-const isLoggedIn = <?php echo isset($_SESSION['user_id']) ? 'true' : 'false'; ?>;
-
-let lastMessageId = 0;
-let chatPolling = null;
-let chatLoaded = false;
 
 // Image gallery
 function changeImage(thumb, src) {
@@ -545,186 +401,6 @@ function changeImage(thumb, src) {
     t.classList.remove('active');
   });
   thumb.classList.add('active');
-}
-
-// Chat functionality
-document.getElementById('openChat').onclick = function() {
-  // Kiểm tra không chat với chính mình
-  if (currentUserId === sellerId) {
-    alert('Đây là sản phẩm của bạn!');
-    return;
-  }
-  
-  document.getElementById('chatBox').style.display = 'block';
-  
-  if (!chatLoaded && isLoggedIn) {
-    loadChatMessages();
-    chatLoaded = true;
-    // Start polling
-    chatPolling = setInterval(pollNewMessages, 3000);
-  } else if (!isLoggedIn) {
-    document.getElementById('chatBody').innerHTML = `
-      <div class="chat-message system">
-        <i class="fa-solid fa-lock me-1"></i> Vui lòng <a href="${basePath}/user/dangnhap.php">đăng nhập</a> để chat với người bán
-      </div>
-    `;
-  }
-};
-
-document.getElementById('closeChat').onclick = function() {
-  document.getElementById('chatBox').style.display = 'none';
-  if (chatPolling) {
-    clearInterval(chatPolling);
-    chatPolling = null;
-  }
-};
-
-// Load tin nhắn
-function loadChatMessages() {
-  const url = `${basePath}/api/get_messages.php?product_id=${productId}&other_user_id=${sellerId}`;
-  
-  fetch(url, { credentials: 'same-origin' })
-    .then(r => r.json())
-    .then(data => {
-      if (data.status !== 'success') {
-        document.getElementById('chatBody').innerHTML = `
-          <div class="chat-message system">Không thể tải tin nhắn</div>
-        `;
-        return;
-      }
-      
-      renderChatMessages(data.messages);
-    })
-    .catch(err => {
-      console.error('Load chat error:', err);
-      document.getElementById('chatBody').innerHTML = `
-        <div class="chat-message system">Lỗi kết nối</div>
-      `;
-    });
-}
-
-function renderChatMessages(messages) {
-  const body = document.getElementById('chatBody');
-  
-  if (messages.length === 0) {
-    body.innerHTML = `
-      <div class="chat-message system">
-        <i class="fa-solid fa-comments me-1"></i> Bắt đầu cuộc trò chuyện về sản phẩm này!
-      </div>
-    `;
-    return;
-  }
-  
-  let html = '';
-  messages.forEach(msg => {
-    if (msg.id > lastMessageId) lastMessageId = msg.id;
-    const msgClass = msg.is_mine ? 'user' : 'seller';
-    html += `<div class="chat-message ${msgClass}">${escapeHtml(msg.message)}</div>`;
-  });
-  
-  body.innerHTML = html;
-  body.scrollTop = body.scrollHeight;
-}
-
-function pollNewMessages() {
-  if (lastMessageId === 0 || !isLoggedIn) return;
-  
-  const url = `${basePath}/api/get_messages.php?product_id=${productId}&other_user_id=${sellerId}&last_id=${lastMessageId}`;
-  
-  fetch(url, { credentials: 'same-origin' })
-    .then(r => r.json())
-    .then(data => {
-      if (data.status !== 'success' || data.messages.length === 0) return;
-      
-      const body = document.getElementById('chatBody');
-      
-      data.messages.forEach(msg => {
-        if (msg.id > lastMessageId) {
-          lastMessageId = msg.id;
-          const msgDiv = document.createElement('div');
-          msgDiv.className = `chat-message ${msg.is_mine ? 'user' : 'seller'}`;
-          msgDiv.textContent = msg.message;
-          body.appendChild(msgDiv);
-        }
-      });
-      
-      body.scrollTop = body.scrollHeight;
-    })
-    .catch(err => console.error('Poll error:', err));
-}
-
-document.getElementById('sendMsg').onclick = sendMessage;
-document.getElementById('chatInput').onkeypress = function(e) {
-  if (e.key === 'Enter' && !e.shiftKey) {
-    e.preventDefault();
-    sendMessage();
-  }
-};
-
-function sendMessage() {
-  if (!isLoggedIn) {
-    alert('Bạn cần đăng nhập để gửi tin nhắn!');
-    window.location.href = basePath + '/user/dangnhap.php';
-    return;
-  }
-  
-  var input = document.getElementById('chatInput');
-  var msg = input.value.trim();
-  if (!msg) return;
-  
-  var btn = document.getElementById('sendMsg');
-  btn.disabled = true;
-  
-  var formData = new FormData();
-  formData.append('product_id', productId);
-  formData.append('receiver_id', sellerId);
-  formData.append('message', msg);
-  
-  fetch(basePath + '/api/send_message.php', {
-    method: 'POST',
-    body: formData,
-    credentials: 'same-origin'
-  })
-  .then(r => r.json())
-  .then(data => {
-    btn.disabled = false;
-    
-    if (data.status === 'success') {
-      input.value = '';
-      
-      // Thêm tin nhắn vào UI
-      var body = document.getElementById('chatBody');
-      
-      // Xóa message system nếu có
-      var systemMsg = body.querySelector('.chat-message.system');
-      if (systemMsg) systemMsg.remove();
-      
-      var msgDiv = document.createElement('div');
-      msgDiv.className = 'chat-message user';
-      msgDiv.textContent = data.data.message;
-      body.appendChild(msgDiv);
-      body.scrollTop = body.scrollHeight;
-      
-      if (data.data.id > lastMessageId) lastMessageId = data.data.id;
-    } else if (data.require_login) {
-      alert('Bạn cần đăng nhập để gửi tin nhắn!');
-      window.location.href = basePath + '/user/dangnhap.php';
-    } else {
-      alert(data.message || 'Không thể gửi tin nhắn');
-    }
-  })
-  .catch(err => {
-    btn.disabled = false;
-    console.error('Send error:', err);
-    alert('Lỗi kết nối, vui lòng thử lại!');
-  });
-}
-
-function escapeHtml(text) {
-  if (!text) return '';
-  var div = document.createElement('div');
-  div.textContent = text;
-  return div.innerHTML;
 }
 
 // Favorite functionality
@@ -762,11 +438,6 @@ document.getElementById('btnFavorite').onclick = function() {
     alert('Có lỗi xảy ra, vui lòng thử lại!');
   });
 };
-
-// Cleanup on page leave
-window.addEventListener('beforeunload', function() {
-  if (chatPolling) clearInterval(chatPolling);
-});
 </script>
 
 <?php require_once __DIR__ . '/includes/footer.php'; ?>
