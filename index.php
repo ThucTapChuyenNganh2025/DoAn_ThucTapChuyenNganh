@@ -183,7 +183,7 @@ if ($username !== null) {
         <!-- SEARCH BAR -->
         <div class="col-sm-6 offset-sm-2 offset-md-0 col-lg-5 d-none d-lg-block">
           <div class="search-bar row bg-light p-2 my-2 rounded-4 align-items-center">
-
+            <input type="hidden" id="categorySelect" value="">
             <!-- Custom Dropdown Categories -->
             <div class="col-md-4 d-none d-md-block">
               <div class="custom-dropdown">
@@ -200,10 +200,10 @@ if ($username !== null) {
 
             <!-- Search Input -->
             <div class="col-12 col-md-8 d-flex">
-              <form id="search-form" class="flex-grow-1 d-flex m-0" action="index.php" method="get">
+              <form id="search-form" class="flex-grow-1 d-flex m-0">
                 <input type="hidden" name="category" value="">
                 <input type="text" class="form-control border-0 bg-light" placeholder="Tìm sản phẩm, dịch vụ..."
-                  name="query">
+                  id="searchInput">
                 <button class="btn btn-primary" type="submit">
                   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
                     <path fill="currentColor"

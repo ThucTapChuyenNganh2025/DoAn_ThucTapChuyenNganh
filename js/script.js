@@ -1622,3 +1622,43 @@ $(document).ready(function () {
     renderCartIntoOffcanvas();
   });
 });
+
+document.getElementById('search-form')?.addEventListener('submit', function(e){
+  e.preventDefault();
+
+  const keyword = document.getElementById('searchInput').value.trim();
+  const categoryId = document.getElementById('categorySelect').value;
+
+  fetch(`api/search_products.php?keyword=${encodeURIComponent(keyword)}&category_id=${categoryId}`)
+    .then(r => r.json())
+    .then(resp => {
+      const wrapper = document.querySelector('#search-results-section .swiper-wrapper');
+      wrapper.innerHTML = '';
+
+      if (!resp || resp.status !== 'success' || resp.products.length === 0) {
+        wrapper.innerHTML = `<div class="swiper-slide no-results p-3">Không tìm thấy sản phẩm</div>`;
+        return;
+      }
+
+      resp.products.forEach(p => {
+        wrapper.innerHTML += `
+          <div class="swiper-slide">
+            <div class="product-item border p-3 h-100" data-product-id="${p.id}">
+              <figure class="text-center mb-3">
+                <a href="product.php?id=${p.id}">
+                  <img src="${p.image}" class="tab-image">
+                </a>
+              </figure>
+              <h3 class="product-name">${p.title}</h3>
+              <span class="price d-block mt-2 text-success fw-bold">
+                ${Number(p.price).toLocaleString('vi-VN')} ${p.currency}
+              </span>
+            </div>
+          </div>`;
+      });
+
+      if (window.searchResultsSwiper) window.searchResultsSwiper.update();
+    });
+});
+
+

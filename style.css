@@ -1178,3 +1178,47 @@ header .logo-box .logo-text {
     height: 740px;
   }
 }
+/* ==========================================================================
+  CHAT BOX
+   ========================================================================== */
+.chat-box {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 320px;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  display: none;
+  z-index: 9999;
+}
+.chat-header {
+  background: #0d6efd;
+  color: #fff;
+  padding: 10px;
+  font-weight: bold;
+  border-radius: 8px 8px 0 0;
+}
+.chat-body {
+  padding: 10px;
+  height: 200px;
+  overflow-y: auto;
+  font-size: 14px;
+}
+.chat-footer {
+  padding: 8px;
+  border-top: 1px solid #ddd;
+}
+.chat-footer textarea {
+  width: 100%;
+  resize: none;
+  height: 50px;
+}
+.chat-message.user {
+  text-align: right;
+  margin-bottom: 5px;
+}
+.chat-message.system {
+  color: #555;
+  font-style: italic;
+}
