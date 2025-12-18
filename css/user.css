@@ -1,0 +1,106 @@
+/* User area styles - /css/user.css */
+:root{
+  --accent:#ff9f43;
+  --accent-dark:#e08e0b;
+  --muted:#6c757d;
+  --card-bg:#ffffff;
+  --page-bg:#f4f6f9;
+}
+
+/* Header */
+.logo-box{display:inline-flex;align-items:center;gap:10px;padding:6px 12px;background:#2b3538;color:#fff;border-radius:8px;text-decoration:none;box-shadow:0 2px 6px rgba(11,14,16,0.12)}
+.logo-box i{background:var(--accent);color:#fff;padding:6px;border-radius:6px;font-size:14px;display:inline-flex;align-items:center;justify-content:center}
+.logo-box .logo-text{font-weight:900;letter-spacing:1px;margin-left:2px;color:#ffffff;font-size:13px;text-transform:uppercase;text-shadow:0 1px 0 rgba(0,0,0,0.25)}
+.search-wrapper .input-group{background:#fff;border-radius:999px;padding:6px}
+.search-wrapper .form-select{background:transparent}
+.btn-search{background:var(--accent);border:none;padding:10px 18px;border-radius:999px}
+.btn-search i{font-size:16px}
+.btn-outline-post{border:1px solid var(--accent);color:var(--accent);background:#fff;padding:6px 10px;border-radius:8px;font-weight:700}
+.btn-outline-post:hover{background:var(--accent);color:#fff}
+.icon-btn{display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50%;background:transparent;color:#333;text-decoration:none}
+.icon-btn i{font-size:16px}
+
+html,body{
+  height:100%;
+  background:#ffffff;
+  font-family: 'Segoe UI', Roboto, -apple-system, 'Helvetica Neue', Arial;
+  color:#222;
+}
+/* Seller aside (left column) */
+.seller-aside{
+  height:100%;
+  background:var(--card-bg);
+  border-radius:8px;
+  padding:18px;
+  border:1px solid rgba(0,0,0,0.04);
+}
+.seller-aside .brand{
+  font-weight:900;
+  color:var(--accent);
+  font-size:20px;
+  text-transform:uppercase;
+  letter-spacing:1px;
+  margin-bottom:14px;
+}
+
+/* Header greeting */
+.support-box span{color:var(--muted);display:block}
+.support-box #user-name{color:#222;font-weight:700}
+.seller-aside ul{padding-left:0;margin:0;}
+.seller-aside ul li{list-style:none}
+.seller-aside a{display:block;padding:12px 10px;color:#4b5563;border-radius:6px;text-decoration:none;margin-bottom:6px}
+.seller-aside a:visited{color:#4b5563}
+/* Active: light yellow with orange left border (like reference) */
+.seller-aside a.active{background:#fff6e6;color:var(--accent);font-weight:800;border-left:4px solid var(--accent);padding-left:8px}
+.seller-aside a:hover{background:#fff9f0;color:var(--accent-dark)}
+
+/* Card and buttons */
+.card-custom{background:var(--card-bg);border:none;border-radius:10px;box-shadow:0 6px 18px rgba(18,38,63,0.06);padding:20px;color:#222}
+/* Card header accent for listings */
+.card.card-custom{border-top:4px solid var(--accent)}
+.btn-cam{background:var(--accent);border:none;color:#fff;padding:10px 18px;border-radius:8px;font-weight:700}
+.btn-cam:hover{background:var(--accent-dark)}
+
+/* Forms */
+.form-control:focus{box-shadow:0 0 0 0.15rem rgba(255,159,67,0.18);border-color:var(--accent)}
+label{font-weight:600}
+
+/* Small tweaks for thumbnails in dashboard */
+.table img{border-radius:6px;border:1px solid rgba(0,0,0,0.06);}
+
+/* Headings contrast */
+h1,h2,h3,h4,h5{color:#222;font-weight:700}
+
+/* Dashboard greeting */
+.dashboard-greeting{color:#2f3e46;font-weight:800;font-size:28px;margin-bottom:6px}
+
+/* Links inside content */
+a{color:var(--accent-dark)}
+a:hover{color:var(--accent)}
+
+/* Stat cards */
+.stat-card{border-radius:10px;padding:18px;color:#fff;position:relative;overflow:hidden}
+.stat-card h3{font-size:34px;margin:0 0 6px 0}
+.stat-card p{opacity:0.95}
+.stat-card .icon{position:absolute;right:18px;top:50%;transform:translateY(-50%);font-size:64px;opacity:0.12}
+.bg-blue{background:#0da5b3}
+.bg-yellow{background:#ffc107;color:#222}
+.bg-green{background:#28a745}
+
+/* Alert tweaks to match reference */
+.alert-info{background:#e6fbff;border-color:#bfeefc;color:#0b6670}
+
+/* Table section title */
+.card.card-custom h4{color:var(--accent);font-weight:800}
+
+/* Badges */
+.badge{font-weight:700}
+
+/* Responsive adjustments */
+@media (max-width:991px){
+  .seller-aside{display:none}
+  .card-custom{margin:0}
+}
+
+/* Minor utility */
+.text-warning-strong{color:var(--accent);font-weight:800}
