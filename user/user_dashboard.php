@@ -22,24 +22,189 @@ $approved = $conn->query("SELECT COUNT(*) as c FROM products WHERE seller_id = $
 
 <?php include_once dirname(__DIR__) . '/includes/header.php'; ?>
 
-<div class="container mt-4">
-    <div class="row">
-        <div class="col-lg-3 d-none d-lg-block">
-            <aside class="seller-aside">
-                <div class="text-center mb-3 brand"><i class="fa-solid fa-store me-2"></i>Đăng Tin</div>
-                <ul class="list-unstyled">
-                    <li><a href="user_dashboard.php" class="active">Tổng Quan</a></li>
-                    <li><a href="user_dangtin.php">Đăng Tin</a></li>
-                    <li><a href="user_quanlytin.php">Tin Đã Đăng</a></li>
-                </ul>
-            </aside>
-        </div>
+<style>
+    .profile-page {
+        padding: 40px 0;
+        min-height: calc(100vh - 150px);
+        background: linear-gradient(135deg, #f5f7fa 0%, #e4e8ec 100%);
+    }
+    
+    /* Sidebar */
+    .profile-sidebar {
+        background: #fff;
+        border-radius: 15px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+        padding: 25px;
+    }
+    
+    .sidebar-title {
+        font-weight: 700;
+        color: #1a1a2e;
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #eee;
+    }
+    
+    .sidebar-menu {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+    
+    .sidebar-menu li {
+        margin-bottom: 5px;
+    }
+    
+    .sidebar-menu a {
+        display: flex;
+        align-items: center;
+        padding: 12px 15px;
+        color: #555;
+        text-decoration: none;
+        border-radius: 8px;
+        transition: all 0.2s ease;
+    }
+    
+    .sidebar-menu a:hover,
+    .sidebar-menu a.active {
+        background: #f6c23e;
+        color: #1a1a2e;
+        font-weight: 600;
+    }
+    
+    .sidebar-menu a i {
+        margin-right: 12px;
+        width: 20px;
+        text-align: center;
+    }
+    
+    .sidebar-menu a.text-danger {
+        color: #dc3545 !important;
+    }
+    
+    .sidebar-menu a.text-danger:hover {
+        background: #dc3545;
+        color: #fff !important;
+    }
+    
+    /* Dashboard Greeting */
+    .dashboard-greeting {
+        font-size: 28px;
+        font-weight: 700;
+        color: #1a1a2e;
+        margin-bottom: 20px;
+    }
+    
+    /* Stat Cards */
+    .stat-card {
+        background: #fff;
+        border-radius: 15px;
+        padding: 25px;
+        text-align: center;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+        position: relative;
+        overflow: hidden;
+        margin-bottom: 20px;
+    }
+    
+    .stat-card h3 {
+        font-size: 36px;
+        font-weight: 800;
+        margin-bottom: 5px;
+    }
+    
+    .stat-card p {
+        font-size: 14px;
+        margin: 0;
+        opacity: 0.9;
+    }
+    
+    .stat-card .icon {
+        position: absolute;
+        right: 15px;
+        bottom: 15px;
+        font-size: 40px;
+        opacity: 0.2;
+    }
+    
+    .stat-card.bg-blue {
+        background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
+        color: #fff;
+    }
+    
+    .stat-card.bg-yellow {
+        background: linear-gradient(45deg, #f6c23e, #dda20a);
+        color: #1a1a2e;
+    }
+    
+    .stat-card.bg-green {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        color: #fff;
+    }
+    
+    /* Card Custom */
+    .card-custom {
+        background: #fff;
+        border-radius: 15px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+        border: none;
+    }
+    
+    .card-custom h4 {
+        color: #f6c23e;
+        font-weight: 700;
+    }
+    
+    /* Dashboard Table */
+    .dashboard-table thead th {
+        font-weight: 700;
+        color: #1a1a2e;
+        background: #f8f9fa;
+        border-bottom: 2px solid #e9ecef;
+        font-size: 13px;
+        padding: 15px 10px;
+    }
+    
+    .dashboard-table tbody td {
+        padding: 15px 10px;
+        border-bottom: 1px solid #eee;
+        color: #333;
+        vertical-align: middle;
+    }
+    
+    .dashboard-table tbody tr:hover {
+        background: #f8f9fa;
+    }
+    
+    .alert {
+        border-radius: 10px;
+        padding: 15px 20px;
+    }
+</style>
 
-        <div class="col-lg-9">
-    <h2 class="dashboard-greeting">Xin chào, <?php echo htmlspecialchars($user_name, ENT_QUOTES, 'UTF-8'); ?>!</h2>
+<div class="profile-page">
+    <div class="container">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-lg-3 mb-4">
+                <div class="profile-sidebar">
+                    <h5 class="sidebar-title"><i class="fa-solid fa-user-gear me-2"></i>Menu</h5>
+                    <ul class="sidebar-menu">
+                        <li><a href="profile.php"><i class="fa-solid fa-user"></i> Hồ sơ cá nhân</a></li>
+                        <li><a href="user_dashboard.php" class="active"><i class="fa-solid fa-gauge"></i> Dashboard</a></li>
+                        <li><a href="user_dangtin.php"><i class="fa-solid fa-plus"></i> Đăng tin mới</a></li>
+                        <li><a href="user_quanlytin.php"><i class="fa-solid fa-list"></i> Quản lý tin</a></li>
+                        <li><a href="doimk.php"><i class="fa-solid fa-key"></i> Đổi mật khẩu</a></li>
+                        <li><a href="dangxuat.php" class="text-danger"><i class="fa-solid fa-right-from-bracket"></i> Đăng xuất</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="col-lg-9">
+                <h2 class="dashboard-greeting"><i class="fa-solid fa-hand-wave me-2" style="color: #f6c23e;"></i>Xin chào, <?php echo htmlspecialchars($user_name, ENT_QUOTES, 'UTF-8'); ?>!</h2>
 
     <div class="alert alert-info">
-        <i class="fa-solid fa-bell"></i> Bạn có <b><?php echo $pending; ?></b> tin đang chờ duyệt. Hãy kiểm tra thường xuyên nhé!
+        <i class="fa-solid fa-bell me-2"></i> Bạn có <b><?php echo $pending; ?></b> tin đang chờ duyệt. Hãy kiểm tra thường xuyên nhé!
     </div>
 
     <div class="row mb-4">
@@ -51,7 +216,7 @@ $approved = $conn->query("SELECT COUNT(*) as c FROM products WHERE seller_id = $
             </div>
         </div>
         <div class="col-md-4">
-            <div class="stat-card bg-yellow" style="color: #333;">
+            <div class="stat-card bg-yellow">
                 <h3><?php echo $pending; ?></h3>
                 <p>Tin Đang Chờ Duyệt</p>
                 <i class="fa-solid fa-clock icon"></i>
@@ -67,27 +232,8 @@ $approved = $conn->query("SELECT COUNT(*) as c FROM products WHERE seller_id = $
     </div>
 
     <div class="card card-custom p-4">
-        <h4 class="mb-3 text-warning"><i class="fa-solid fa-newspaper"></i> Tin Đăng Gần Đây</h4>
+        <h4 class="mb-3"><i class="fa-solid fa-newspaper me-2"></i> Tin Đăng Gần Đây</h4>
         <p class="text-muted">Xem nhanh các tin bạn vừa đăng. Bạn có thể chỉnh sửa hoặc xóa tại đây.</p>
-        
-        <style>
-            .dashboard-table thead th {
-                font-weight: 800;
-                color: #222;
-                background: #f5f5f5;
-                border-bottom: 2px solid #ddd;
-                font-size: 13px;
-                padding: 12px 8px;
-            }
-            .dashboard-table tbody td {
-                padding: 12px 8px;
-                border-bottom: 1px solid #eee;
-                color: #222;
-            }
-            .dashboard-table tbody tr:hover {
-                background: #fafafa;
-            }
-        </style>
         
         <table class="table align-middle dashboard-table">
             <thead class="table-light">
@@ -153,8 +299,9 @@ $approved = $conn->query("SELECT COUNT(*) as c FROM products WHERE seller_id = $
             </tbody>
         </table>
     </div>
+            </div>
         </div>
     </div>
-    </div>
+</div>
 
 <?php include_once dirname(__DIR__) . '/includes/footer.php'; ?>

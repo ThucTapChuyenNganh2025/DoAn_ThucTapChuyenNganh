@@ -59,69 +59,257 @@ if(isset($_POST['btn_dangtin'])) {
 
 <?php include_once dirname(__DIR__) . '/includes/header.php'; ?>
 
-<div class="container mt-4">
-    <div class="row">
-        <div class="col-lg-3 d-none d-lg-block">
-            <aside class="seller-aside">
-                <div class="text-center mb-3 brand"><i class="fa-solid fa-store me-2"></i>Đăng Tin</div>
-                <ul class="list-unstyled">
-                    <li><a href="user_dashboard.php">Tổng Quan</a></li>
-                    <li><a href="user_dangtin.php" class="active">Đăng Tin</a></li>
-                    <li><a href="user_quanlytin.php">Tin Đã Đăng</a></li>
-                </ul>
-            </aside>
-        </div>
+<style>
+    .profile-page {
+        padding: 40px 0;
+        min-height: calc(100vh - 150px);
+        background: linear-gradient(135deg, #f5f7fa 0%, #e4e8ec 100%);
+    }
+    
+    /* Sidebar */
+    .profile-sidebar {
+        background: #fff;
+        border-radius: 15px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+        padding: 25px;
+    }
+    
+    .sidebar-title {
+        font-weight: 700;
+        color: #1a1a2e;
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #eee;
+    }
+    
+    .sidebar-menu {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+    
+    .sidebar-menu li {
+        margin-bottom: 5px;
+    }
+    
+    .sidebar-menu a {
+        display: flex;
+        align-items: center;
+        padding: 12px 15px;
+        color: #555;
+        text-decoration: none;
+        border-radius: 8px;
+        transition: all 0.2s ease;
+    }
+    
+    .sidebar-menu a:hover,
+    .sidebar-menu a.active {
+        background: #f6c23e;
+        color: #1a1a2e;
+        font-weight: 600;
+    }
+    
+    .sidebar-menu a i {
+        margin-right: 12px;
+        width: 20px;
+        text-align: center;
+    }
+    
+    .sidebar-menu a.text-danger {
+        color: #dc3545 !important;
+    }
+    
+    .sidebar-menu a.text-danger:hover {
+        background: #dc3545;
+        color: #fff !important;
+    }
+    
+    /* Form Card */
+    .form-card {
+        background: #fff;
+        border-radius: 20px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        overflow: hidden;
+    }
+    
+    .form-header {
+        background: linear-gradient(135deg, #1a1a2e 0%, #2d2d44 100%);
+        padding: 30px;
+        text-align: center;
+    }
+    
+    .form-header h2 {
+        color: #fff;
+        font-size: 24px;
+        font-weight: 700;
+        margin: 0;
+    }
+    
+    .form-header p {
+        color: rgba(255,255,255,0.7);
+        margin: 10px 0 0;
+        font-size: 14px;
+    }
+    
+    .form-body {
+        padding: 40px;
+    }
+    
+    .form-group {
+        margin-bottom: 25px;
+    }
+    
+    .form-label {
+        font-weight: 600;
+        color: #1a1a2e;
+        margin-bottom: 8px;
+        display: block;
+    }
+    
+    .form-control, .form-select {
+        border: 2px solid #e9ecef;
+        border-radius: 10px;
+        padding: 12px 15px;
+        font-size: 15px;
+        transition: all 0.3s ease;
+    }
+    
+    .form-control:focus, .form-select:focus {
+        border-color: #f6c23e;
+        box-shadow: 0 0 0 3px rgba(246, 194, 62, 0.15);
+    }
+    
+    textarea.form-control {
+        min-height: 120px;
+        resize: vertical;
+    }
+    
+    .btn-submit {
+        background: linear-gradient(45deg, #f6c23e, #dda20a);
+        color: #1a1a2e;
+        border: none;
+        padding: 14px 30px;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 16px;
+        width: 100%;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-submit:hover {
+        background: linear-gradient(45deg, #dda20a, #c99107);
+        color: #1a1a2e;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 20px rgba(246, 194, 62, 0.4);
+    }
+    
+    .upload-box {
+        border: 2px dashed #ddd;
+        border-radius: 10px;
+        padding: 20px;
+        text-align: center;
+        background: #f8f9fa;
+        transition: all 0.3s ease;
+    }
+    
+    .upload-box:hover {
+        border-color: #f6c23e;
+        background: #fffef7;
+    }
+    
+    .upload-box i {
+        font-size: 40px;
+        color: #ddd;
+        margin-bottom: 10px;
+    }
+</style>
 
-        <div class="col-lg-9">
-            <div class="card card-custom p-4" style="border-radius:8px; box-shadow:0 4px 6px rgba(0,0,0,0.06);">
-        <h4 class="mb-4 text-warning"><i class="fa-solid fa-camera"></i> Đăng Bán Sản Phẩm</h4>
-        
-        <form method="POST" enctype="multipart/form-data">
-            <div class="row">
-                <div class="col-md-8">
-                    <div class="mb-3">
-                        <label>Tên sản phẩm</label>
-                        <input type="text" name="title" class="form-control" required placeholder="Ví dụ: iPhone 15 Pro Max cũ...">
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label>Giá bán (VNĐ)</label>
-                            <input type="number" name="price" class="form-control" required placeholder="VD: 100000" min="1000" step="1000">
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label>Danh mục</label>
-                            <select name="category_id" class="form-select" required>
-                                <option value="">-- Chọn --</option>
-                                <?php
-                                $cats = $conn->query("SELECT * FROM categories");
-                                while($c = $cats->fetch_assoc()){
-                                    echo "<option value='".$c['id']."'>".$c['name']."</option>";
-                                }
-                                ?>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="mb-3">
-                        <label>Mô tả chi tiết</label>
-                        <textarea name="description" class="form-control" rows="5" placeholder="Mô tả tình trạng, xuất xứ..."></textarea>
-                    </div>
+<div class="profile-page">
+    <div class="container">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-lg-3 mb-4">
+                <div class="profile-sidebar">
+                    <h5 class="sidebar-title"><i class="fa-solid fa-user-gear me-2"></i>Menu</h5>
+                    <ul class="sidebar-menu">
+                        <li><a href="profile.php"><i class="fa-solid fa-user"></i> Hồ sơ cá nhân</a></li>
+                        <li><a href="user_dashboard.php"><i class="fa-solid fa-gauge"></i> Dashboard</a></li>
+                        <li><a href="user_dangtin.php" class="active"><i class="fa-solid fa-plus"></i> Đăng tin mới</a></li>
+                        <li><a href="user_quanlytin.php"><i class="fa-solid fa-list"></i> Quản lý tin</a></li>
+                        <li><a href="doimk.php"><i class="fa-solid fa-key"></i> Đổi mật khẩu</a></li>
+                        <li><a href="dangxuat.php" class="text-danger"><i class="fa-solid fa-right-from-bracket"></i> Đăng xuất</a></li>
+                    </ul>
                 </div>
-                
-                <div class="col-md-4">
-                    <div class="mb-3">
-                        <label>Hình ảnh (có thể chọn nhiều)</label>
-                        <input type="file" name="image[]" multiple class="form-control" required>
-                        <div class="mt-2 text-muted small">Bạn có thể chọn nhiều hình cùng lúc.</div>
+            </div>
+
+            <div class="col-lg-9">
+                <div class="form-card">
+                    <div class="form-header">
+                        <h2><i class="fa-solid fa-camera me-2"></i>Đăng Bán Sản Phẩm</h2>
+                        <p>Thêm sản phẩm mới để bán trên website</p>
+                    </div>
+                    
+                    <div class="form-body">
+                        <form method="POST" enctype="multipart/form-data">
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <div class="form-group">
+                                        <label class="form-label"><i class="fa-solid fa-tag me-2" style="color: #f6c23e;"></i>Tên sản phẩm</label>
+                                        <input type="text" name="title" class="form-control" required placeholder="Ví dụ: iPhone 15 Pro Max cũ...">
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label class="form-label"><i class="fa-solid fa-money-bill me-2" style="color: #f6c23e;"></i>Giá bán (VNĐ)</label>
+                                                <input type="number" name="price" class="form-control" required placeholder="VD: 100000" min="1000" step="1000">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label class="form-label"><i class="fa-solid fa-folder me-2" style="color: #f6c23e;"></i>Danh mục</label>
+                                                <select name="category_id" class="form-select" required>
+                                                    <option value="">-- Chọn danh mục --</option>
+                                                    <?php
+                                                    $cats = $conn->query("SELECT * FROM categories");
+                                                    while($c = $cats->fetch_assoc()){
+                                                        echo "<option value='".$c['id']."'>".$c['name']."</option>";
+                                                    }
+                                                    ?>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="form-label"><i class="fa-solid fa-align-left me-2" style="color: #f6c23e;"></i>Mô tả chi tiết</label>
+                                        <textarea name="description" class="form-control" rows="5" placeholder="Mô tả tình trạng, xuất xứ..."></textarea>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label class="form-label"><i class="fa-solid fa-images me-2" style="color: #f6c23e;"></i>Hình ảnh sản phẩm</label>
+                                        <div class="upload-box">
+                                            <i class="fa-solid fa-cloud-arrow-up"></i>
+                                            <p class="text-muted mb-2">Kéo thả hoặc click để chọn ảnh</p>
+                                            <input type="file" name="image[]" multiple class="form-control" required>
+                                        </div>
+                                        <div class="mt-2 text-muted small">
+                                            <i class="fa-solid fa-circle-info me-1"></i>Bạn có thể chọn nhiều hình cùng lúc.
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <button type="submit" name="btn_dangtin" class="btn-submit">
+                                <i class="fa-solid fa-paper-plane me-2"></i>ĐĂNG TIN NGAY
+                            </button>
+                        </form>
                     </div>
                 </div>
             </div>
-            
-            <button type="submit" name="btn_dangtin" class="btn btn-cam w-100 py-2">ĐĂNG TIN NGAY</button>
-        </form>
-            </div>
         </div>
     </div>
-    </div>
+</div>
 
 <?php include_once dirname(__DIR__) . '/includes/footer.php'; ?>

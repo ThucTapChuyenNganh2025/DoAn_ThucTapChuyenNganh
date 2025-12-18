@@ -2,7 +2,7 @@
 session_start();
 header('Content-Type: application/json; charset=utf-8');
 require_once __DIR__ . '/../config/connect.php';
-@mysqli_select_db($conn, 'choto');
+@mysqli_select_db($conn, 'webchotot');
 
 $q = isset($_GET['q']) ? trim($_GET['q']) : '';
 $cat = isset($_GET['category']) ? trim($_GET['category']) : '';

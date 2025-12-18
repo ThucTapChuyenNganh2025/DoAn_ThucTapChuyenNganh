@@ -362,7 +362,6 @@ header .logo-box .logo-text {
   color: #fff;
   font-weight: 700;
 }
-}
 
 /* ==========================================================================
    6. SEARCH INPUT
@@ -676,7 +675,7 @@ header .logo-box .logo-text {
 .post-item .favorite-btn {
   position: absolute;
   top: 12px;
-  right: 12px;
+  left: 12px;
   width: 40px;
   height: 40px;
   display: inline-flex;
@@ -713,7 +712,7 @@ header .logo-box .logo-text {
 .product-item .btn-wishlist {
   position: absolute;
   top: 16px;
-  right: 16px;
+  left: 16px;
   width: 40px;
   height: 40px;
   border-radius: 50%;

@@ -1,11 +1,11 @@
 <?php
-$servername = "localhost";
-$username = "root";      // Mặc định XAMPP user là root
-$password = "";          // Mặc định XAMPP pass là rỗng
-$dbname = "webchotot";  
+$db_host = "localhost";
+$db_user = "root";       // Mặc định XAMPP user là root
+$db_pass = "";           // Mặc định XAMPP pass là rỗng
+$db_name = "webchotot";  
 
 // Tạo kết nối
-$conn = new mysqli($servername, $username, $password, $dbname);
+$conn = new mysqli($db_host, $db_user, $db_pass, $db_name);
 
 // Kiểm tra kết nối
 if ($conn->connect_error) {

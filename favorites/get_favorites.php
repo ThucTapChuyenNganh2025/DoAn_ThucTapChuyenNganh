@@ -3,56 +3,50 @@ session_start();
 header('Content-Type: application/json; charset=utf-8');
 
 require_once __DIR__ . '/../config/connect.php';
-@mysqli_select_db($conn, 'choto');
 
-$session_key = session_id();
-$user_id = isset($_SESSION['user_id']) ? intval($_SESSION['user_id']) : null;
+$user_id = isset($_SESSION['user_id']) ? intval($_SESSION['user_id']) : 0;
 
-// ensure table exists (best-effort)
-@mysqli_query($conn, "CREATE TABLE IF NOT EXISTS `favorites` (
-  `id` INT AUTO_INCREMENT PRIMARY KEY,
-  `session_key` VARCHAR(128) DEFAULT NULL,
-  `user_id` INT DEFAULT NULL,
-  `product_id` VARCHAR(191) NOT NULL,
-  `title` TEXT,
-  `price` VARCHAR(64),
-  `image` VARCHAR(255),
-  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-)");
-
-// Return a stable unique favorite per normalized product_id and include a representative favorite row id (min id)
-if ($user_id) {
-  // Merge both user-bound and session-bound rows to avoid duplicates after login
-  $stmt = $conn->prepare('SELECT TRIM(product_id) AS pid, MIN(id) AS favorite_id, MAX(title) AS title, MAX(price) AS price, MAX(image) AS image
-              FROM favorites WHERE user_id = ? OR session_key = ?
-              GROUP BY pid
-              ORDER BY MIN(created_at) DESC');
-  $stmt->bind_param('is', $user_id, $session_key);
-} else {
-  $stmt = $conn->prepare('SELECT TRIM(product_id) AS pid, MIN(id) AS favorite_id, MAX(title) AS title, MAX(price) AS price, MAX(image) AS image
-              FROM favorites WHERE session_key = ?
-              GROUP BY pid
-              ORDER BY MIN(created_at) DESC');
-  $stmt->bind_param('s', $session_key);
+if ($user_id <= 0) {
+    echo json_encode(['status' => 'success', 'favorites' => []]);
+    exit;
 }
 
+// Lấy danh sách sản phẩm đã yêu thích kèm thông tin sản phẩm
+$sql = "SELECT f.id AS favorite_id, f.product_id, p.title, p.price, p.currency,
+               (SELECT filename FROM product_images pi WHERE pi.product_id = p.id ORDER BY pi.sort_order ASC LIMIT 1) AS image
+        FROM favorites f
+        LEFT JOIN products p ON f.product_id = p.id
+        WHERE f.user_id = ?
+        ORDER BY f.created_at DESC";
+
+$stmt = $conn->prepare($sql);
+$stmt->bind_param('i', $user_id);
+$stmt->execute();
+$res = $stmt->get_result();
+
 $items = [];
-if ($stmt && $stmt->execute()) {
-  $res = $stmt->get_result();
-  if ($res) {
-    while ($row = $res->fetch_assoc()) {
-      $items[] = [
-        'product_id' => $row['pid'],
+while ($row = $res->fetch_assoc()) {
+    // Xử lý đường dẫn ảnh - filename có thể đã có 'uploads/' hoặc chưa
+    $img = $row['image'];
+    if ($img) {
+        // Nếu đã có 'uploads/' thì giữ nguyên, chưa có thì thêm vào
+        if (strpos($img, 'uploads/') !== 0) {
+            $img = 'uploads/' . $img;
+        }
+    } else {
+        $img = 'images/default-product.jpg';
+    }
+    
+    $items[] = [
+        'product_id' => $row['product_id'],
         'favorite_id' => $row['favorite_id'],
         'title' => $row['title'],
         'price' => $row['price'],
-        'image' => $row['image'],
-      ];
-    }
-  }
+        'currency' => $row['currency'],
+        'image' => $img,
+    ];
 }
-if ($stmt) { $stmt->close(); }
+$stmt->close();
 
 echo json_encode(['status' => 'success', 'favorites' => $items]);
-
 ?>

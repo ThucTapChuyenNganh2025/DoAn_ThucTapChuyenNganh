@@ -1,306 +1,653 @@
 <?php
 // Header include - used by pages under project root and subfolders.
-// Adjust BASE_PATH if you serve project under a subpath.
+if (session_status() !== PHP_SESSION_ACTIVE) {
+    session_start();
+}
+
 $BASE_PATH = '/DoAn_ThucTapChuyenNganh';
+
+// Kết nối database (phải include trước để lấy categories)
+require_once __DIR__ . '/../config/connect.php';
+
+// Lấy tên người dùng từ session (hỗ trợ cả user và admin)
+$display_username = null;
+if (isset($_SESSION['user_name']) && !empty($_SESSION['user_name'])) {
+    $display_username = trim($_SESSION['user_name']);
+} elseif (isset($_SESSION['admin_name']) && !empty($_SESSION['admin_name'])) {
+    $display_username = trim($_SESSION['admin_name']);
+}
+
+if ($display_username !== null) {
+    $display_username = htmlspecialchars($display_username, ENT_QUOTES, 'UTF-8');
+}
+$categories = [];
+$cat_sql = "SELECT id, name FROM categories ORDER BY name ASC";
+$cat_result = $conn->query($cat_sql);
+if ($cat_result && $cat_result->num_rows > 0) {
+    while ($cat_row = $cat_result->fetch_assoc()) {
+        $categories[] = $cat_row;
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="vi">
-
 <head>
+  <title>Chợ Điện Tử Online</title>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="format-detection" content="telephone=no">
-  <meta name="author" content="Nhóm phát triển">
-  <title>Chợ Điện Tử Online</title>
+  <meta name="description" content="Hệ thống chợ điện tử trực tuyến">
 
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@9/swiper-bundle.min.css">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/3.0.0/uicons-solid-rounded/css/uicons-solid-rounded.css'>
-  <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/3.0.0/uicons-brands/css/uicons-brands.css'>
+  <!-- Bootstrap 5.3 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Font Awesome 6 -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-  <link rel="stylesheet" type="text/css" href="<?php echo $BASE_PATH; ?>/css/vendor.css">
-  <link rel="stylesheet" type="text/css" href="<?php echo $BASE_PATH; ?>/style.css">
-  <link rel="stylesheet" type="text/css" href="<?php echo $BASE_PATH; ?>/css/user.css">
-
+  <!-- Swiper CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@9/swiper-bundle.min.css">
+  
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="<?php echo $BASE_PATH; ?>/css/vendor.css">
+  <link rel="stylesheet" href="<?php echo $BASE_PATH; ?>/style.css">
+  <link rel="stylesheet" href="<?php echo $BASE_PATH; ?>/css/user.css">
+  
   <style>
-    .main-logo .brand { font-size: 24px; font-weight: 900; color: #ff9f43; text-transform: uppercase; letter-spacing: 1px; display: inline-flex; align-items: center; gap: 8px; }
-    .main-logo .brand i { font-size: 20px; }
-
-    /* Header scroll effect */
-    header {
+    /* ===== HEADER STYLES ===== */
+    .site-header {
       position: fixed;
       top: 0;
       left: 0;
       right: 0;
-      width: 100%;
-      transition: all 0.3s ease;
-      z-index: 1030;
-      background: white;
+      z-index: 1050;
+      background: #1a1a2e;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+      padding: 12px 0;
+      transition: padding 0.3s ease;
     }
-
-    header.header-scrolled {
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-      background: rgba(255,255,255,0.95);
-      backdrop-filter: blur(10px);
+    .site-header.scrolled {
+      padding: 6px 0;
     }
-
-    header.header-scrolled .py-3 {
-      padding-top: 0.5rem !important;
-      padding-bottom: 0.5rem !important;
+    
+    /* Logo */
+    .site-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none !important;
+      color: #fff !important;
+      font-weight: 800;
+      font-size: 20px;
+      text-transform: uppercase;
     }
-
-    /* Hide elements when scrolled */
-    header.header-scrolled .support-box {
-      display: none;
-    }
-
-    header.header-scrolled .search-bar {
-      display: none;
-    }
-
-    /* When scrolled: hide logo, only keep action icons */
-    header.header-scrolled .main-logo {
-      display: none;
-    }
-
-    /* Icon size adjustments */
-    header.header-scrolled .header-action-icon {
+    .site-logo:hover { color: #fff !important; }
+    .site-logo .logo-icon {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(45deg, #f6c23e, #dda20a);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #1a1a2e;
       font-size: 16px;
     }
-
-    /* Smooth transitions */
-    header *,
-    header *::before,
-    header *::after {
-      transition: all 0.3s ease;
+    
+    /* Search bar */
+    .search-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex: 1;
+      max-width: 600px;
+      margin: 0 auto;
     }
-
-    /* Đẩy nội dung xuống dưới để không bị header che */
-    main {
-      padding-top: 90px;
+    
+    .header-search {
+      background: rgba(255,255,255,0.97);
+      border-radius: 50px;
+      padding: 5px 6px 5px 6px;
+      display: flex;
+      align-items: center;
+      width: 100%;
+      transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+      backdrop-filter: blur(10px);
+      overflow: hidden;
+    }
+    
+    .search-icon-box {
+      width: 38px;
+      height: 38px;
+      min-width: 38px;
+      background: linear-gradient(135deg, #f6c23e 0%, #dda20a 100%);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #1a1a2e;
+      font-size: 14px;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .search-icon-box:hover {
+      transform: scale(1.08);
+      box-shadow: 0 4px 15px rgba(246, 194, 62, 0.5);
+    }
+    
+    .header-search input {
+      border: none;
+      outline: none;
+      padding: 10px 15px;
+      flex: 1;
+      font-size: 14px;
+      background: transparent;
+      min-width: 0;
+      color: #333;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .header-search input::placeholder {
+      color: #888;
+    }
+    .header-search .btn-search {
+      background: linear-gradient(135deg, #1a1a2e 0%, #2d2d44 100%);
+      color: #fff;
+      border: none;
+      border-radius: 25px;
+      padding: 10px 22px;
+      font-size: 14px;
+      font-weight: 500;
+      white-space: nowrap;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .header-search .btn-search:hover {
+      background: linear-gradient(135deg, #2d2d44 0%, #3d3d54 100%);
+    }
+    
+    /* When scrolled: collapse to icon */
+    .site-header.scrolled .search-wrapper {
+      justify-content: flex-start;
+      max-width: none;
+      margin: 0 20px;
+    }
+    .site-header.scrolled .header-search {
+      width: 42px;
+      height: 42px;
+      padding: 2px;
+      border-radius: 50%;
+      background: transparent;
+    }
+    .site-header.scrolled .header-search input,
+    .site-header.scrolled .header-search .btn-search {
+      width: 0;
+      padding: 0;
+      opacity: 0;
+      pointer-events: none;
+    }
+    .site-header.scrolled .search-icon-box {
+      width: 36px;
+      height: 36px;
+      min-width: 36px;
+      background: rgba(255,255,255,0.15);
+      color: #fff;
+    }
+    .site-header.scrolled .search-icon-box:hover {
+      background: #f6c23e;
+      color: #1a1a2e;
+    }
+    
+    /* When expanded after scroll */
+    .site-header.scrolled .search-wrapper.expanded .header-search {
+      width: 480px;
+      height: 42px;
+      padding: 2px 4px 2px 2px;
+      border-radius: 25px;
+      background: rgba(255,255,255,0.97);
+      box-shadow: 0 8px 30px rgba(0,0,0,0.25);
+    }
+    .site-header.scrolled .search-wrapper.expanded .header-search input {
+      width: auto;
+      padding: 8px 12px;
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .site-header.scrolled .search-wrapper.expanded .header-search .btn-search {
+      width: auto;
+      padding: 6px 16px;
+      opacity: 1;
+      pointer-events: auto;
+      font-size: 12px;
+      border-radius: 18px;
+      height: 32px;
+    }
+    .site-header.scrolled .search-wrapper.expanded .search-icon-box {
+      background: linear-gradient(135deg, #f6c23e 0%, #dda20a 100%);
+      color: #1a1a2e;
+    }
+    
+    /* Header icons */
+    .header-icon {
+      width: 40px;
+      height: 40px;
+      background: #f0f0f0;
+      border-radius: 50%;
+      display: flex !important;
+      align-items: center;
+      justify-content: center;
+      color: #1a1a2e !important;
+      text-decoration: none !important;
+      transition: all 0.2s ease;
+      border: none;
+      cursor: pointer;
+      position: relative;
+    }
+    .header-icon:hover {
+      background: #fff;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+      color: #1a1a2e !important;
+    }
+    
+    /* Đăng tin button */
+    .btn-post {
+      background: linear-gradient(45deg, #f6c23e, #dda20a);
+      color: #1a1a2e !important;
+      font-weight: 600;
+      padding: 8px 20px;
+      border-radius: 6px;
+      text-decoration: none !important;
+      border: none;
+      font-size: 14px;
+      display: inline-block;
+    }
+    .btn-post:hover {
+      background: linear-gradient(45deg, #dda20a, #c99107);
+      color: #1a1a2e !important;
+    }
+    
+    /* User greeting */
+    .user-greeting {
+      text-align: right;
+      color: #fff;
+    }
+    .user-greeting small { opacity: 0.7; font-size: 12px; }
+    .user-greeting strong { display: block; font-size: 14px; }
+    
+    /* Dropdown menu - Bootstrap override */
+    .header-dropdown .dropdown-toggle::after {
+      display: none !important;
+    }
+    .header-dropdown .dropdown-menu {
+      background: #fff !important;
+      border: 1px solid #eee !important;
+      border-radius: 10px !important;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.15) !important;
+      padding: 10px 0 !important;
+      min-width: 200px !important;
+      margin-top: 10px !important;
+    }
+    .header-dropdown .dropdown-menu .dropdown-item {
+      padding: 10px 20px !important;
+      color: #333 !important;
+      font-size: 14px !important;
+      display: flex !important;
+      align-items: center !important;
+      gap: 10px !important;
+      background: transparent !important;
+    }
+    .header-dropdown .dropdown-menu .dropdown-item:hover {
+      background: #f5f5f5 !important;
+      color: #000 !important;
+    }
+    .header-dropdown .dropdown-menu .dropdown-item.text-danger {
+      color: #dc3545 !important;
+    }
+    .header-dropdown .dropdown-menu .dropdown-item.text-danger:hover {
+      background: #fff5f5 !important;
+    }
+    .header-dropdown .dropdown-divider {
+      margin: 5px 0;
+      border-color: #eee;
+    }
+    
+    /* Body padding for fixed header */
+    body { padding-top: 75px; }
+    
+    /* Hide elements when scrolled */
+    .site-header.scrolled .hide-on-scroll { display: none !important; }
+    
+    /* Compact on scroll */
+    .site-header.scrolled .header-icon { width: 36px; height: 36px; }
+    .site-header.scrolled .btn-post { padding: 6px 15px; font-size: 13px; }
+    
+    /* Category dropdown in search */
+    .category-select {
+      border: none;
+      outline: none;
+      background: transparent;
+      padding: 8px 12px;
+      font-size: 14px;
+      color: #333;
+      cursor: pointer;
+      border-left: 1px solid #ddd;
+      min-width: 120px;
+      max-width: 150px;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23666' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 8px center;
+      padding-right: 28px;
+    }
+    .category-select:focus {
+      outline: none;
+    }
+    .category-select option {
+      padding: 8px;
+    }
+    
+    /* Hide category select when scrolled */
+    .site-header.scrolled .header-search .category-select {
+      width: 0;
+      padding: 0;
+      opacity: 0;
+      border: none;
+      min-width: 0;
+    }
+    .site-header.scrolled .search-wrapper.expanded .header-search .category-select {
+      width: auto;
+      padding: 6px 24px 6px 10px;
+      opacity: 1;
+      border-left: 1px solid #ddd;
+      min-width: 100px;
+      font-size: 12px;
     }
   </style>
 </head>
-
 <body>
-  <?php
-  if (session_status() !== PHP_SESSION_ACTIVE) {
-    session_start();
-  }
-  $username = isset($_SESSION['user_name']) ? htmlspecialchars(trim($_SESSION['user_name']), ENT_QUOTES, 'UTF-8') : null;
-  ?>
 
-  <!-- Header (matches index.php design) -->
-  <header>
-    <div class="container-fluid">
-      <div class="row py-3 border-bottom align-items-center">
-
-        <!-- LEFT: logo -->
-        <div class="col-sm-4 col-lg-3 text-center text-sm-start">
-          <div class="main-logo">
-            <a href="<?php echo $BASE_PATH; ?>/index.php" class="logo-box">
-              <i class="fa-solid fa-bolt"></i>
-              <span class="logo-text">CHỢ ĐIỆN TỬ</span>
-            </a>
-          </div>
-        </div>
-
-        <!-- CENTER: search -->
-        <div class="col-sm-6 offset-sm-2 offset-md-0 col-lg-5 d-none d-lg-block">
-          <div class="search-bar row bg-light p-2 my-2 rounded-4 align-items-center">
-            <div class="col-md-4 d-none d-md-block">
-              <div class="custom-dropdown">
-                <div class="dropdown-selected">Danh mục</div>
-                <ul class="dropdown-list">
-                  <li>Điện tử</li>
-                  <li>Thời trang</li>
-                  <li>Đồ gia dụng</li>
-                  <li>Sách & Văn phòng</li>
-                  <li>Đồ chơi & Trẻ em</li>
-                </ul>
-              </div>
-            </div>
-            <div class="col-12 col-md-8 d-flex">
-              <form id="search-form" class="flex-grow-1 d-flex m-0" action="<?php echo $BASE_PATH; ?>/index.php" method="get">
-                <input type="hidden" name="category" value="">
-                <input type="text" class="form-control border-0 bg-light" placeholder="Tìm sản phẩm, dịch vụ..." name="query">
-                <button class="btn btn-primary" type="submit">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
-                    <path fill="currentColor" d="M21.71 20.29L18 16.61A9 9 0 1 0 16.61 18l3.68 3.68a1 1 0 0 0 1.42 0a1 1 0 0 0 0-1.39ZM11 18a7 7 0 1 1 7-7a7 7 0 0 1-7 7Z" />
-                  </svg>
-                </button>
-              </form>
-            </div>
-          </div>
-        </div>
-
-        <!-- RIGHT: greeting and actions -->
-        <div class="col-sm-8 col-lg-4 d-flex justify-content-end gap-3 align-items-center mt-4 mt-sm-0">
-          <div class="support-box text-end d-none d-xl-block">
-            <span class="fs-6 text-muted">Xin chào</span>
-            <h5 class="mb-0" id="user-name"><?php echo $username ?? 'Khách'; ?></h5>
-          </div>
-
-          <!-- Icons -->
-          <ul class="d-flex list-unstyled m-0 gap-2 position-relative header-icons-list">
-            <!-- User Dropdown -->
-            <li class="dropdown">
-              <?php if ($username): ?>
-                <a href="#" id="user-action" class="rounded-circle bg-light p-2" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">
-                  <i class="fa-solid fa-user header-action-icon"></i>
-                </a>
-                <ul class="dropdown-menu dropdown-menu-end mt-2 shadow-sm">
-                  <li><a class="dropdown-item" href="<?php echo $BASE_PATH; ?>/user/profile.php">Hồ sơ</a></li>
-                  <li><a class="dropdown-item" href="<?php echo $BASE_PATH; ?>/user/dangxuat.php">Đăng xuất</a></li>
-                </ul>
-              <?php else: ?>
-                <a href="<?php echo $BASE_PATH; ?>/user/dangnhap.php?next=/user/user_dangtin.php" id="user-action" class="rounded-circle bg-light p-2" title="Đăng nhập">
-                  <i class="fa-solid fa-user header-action-icon"></i>
-                </a>
-              <?php endif; ?>
-            </li>
-
-            <!-- Favorites / Wishlist -->
-            <li class="position-relative">
-              <a href="#" id="open-favorites" class="rounded-circle bg-light p-2" data-bs-toggle="offcanvas" data-bs-target="#offcanvasFavorites" title="Yêu thích">
-                <i class="fa-solid fa-heart header-action-icon"></i>
-                <span id="favorites-count" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger d-none">0</span>
-              </a>
-            </li>
-          </ul>
-        </div>
-
+<!-- ===== HEADER ===== -->
+<header class="site-header" id="siteHeader">
+  <div class="container-fluid">
+    <div class="row align-items-center">
+      
+      <!-- Logo -->
+      <div class="col-auto">
+        <a href="<?php echo $BASE_PATH; ?>/index.php" class="site-logo">
+          <span class="logo-icon"><i class="fa-solid fa-bolt"></i></span>
+          <span class="d-none d-md-inline">CHỢ ĐIỆN TỬ</span>
+        </a>
       </div>
-    </div>
-  </header>
-  <!-- End header -->
-
-  <!-- Offcanvas Favorites Sidebar -->
-  <div class="offcanvas offcanvas-end" data-bs-scroll="true" tabindex="-1" id="offcanvasFavorites" aria-labelledby="offcanvasFavoritesLabel">
-    <div class="offcanvas-header justify-content-between">
-      <h5 class="offcanvas-title text-warning" id="offcanvasFavoritesLabel"><i class="fa-solid fa-heart"></i> Sản phẩm yêu thích</h5>
-      <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Đóng"></button>
-    </div>
-    <div class="offcanvas-body">
-      <h6 class="d-flex justify-content-between align-items-center mb-3">
-        <span>Sản phẩm yêu thích</span>
-        <span class="badge bg-warning rounded-pill" id="favorites-count-badge">0</span>
-      </h6>
-      <ul class="list-group mb-3" id="favorites-list">
-        <li class="list-group-item text-center text-muted">Chưa có sản phẩm</li>
-      </ul>
-      <button class="w-100 btn btn-outline-danger" id="clear-favorites" type="button">Xóa tất cả</button>
+      
+      <!-- Search Bar (collapsible) -->
+      <div class="col d-none d-lg-block">
+        <div class="search-wrapper" id="searchWrapper">
+          <form action="<?php echo $BASE_PATH; ?>/index.php" method="get" class="header-search" id="headerSearchForm">
+            <div class="search-icon-box" id="searchIconBox">
+              <i class="fa-solid fa-search"></i>
+            </div>
+            <input type="text" name="query" placeholder="Tìm sản phẩm, dịch vụ..." id="searchInput">
+            <select name="category" class="category-select" id="categorySelect">
+              <option value="">Tất cả danh mục</option>
+              <?php foreach ($categories as $cat): ?>
+              <option value="<?php echo (int)$cat['id']; ?>"><?php echo htmlspecialchars($cat['name'], ENT_QUOTES, 'UTF-8'); ?></option>
+              <?php endforeach; ?>
+            </select>
+            <button type="submit" class="btn-search">Tìm kiếm</button>
+          </form>
+        </div>
+      </div>
+      
+      <!-- Right Section -->
+      <div class="col-auto">
+        <div class="d-flex align-items-center gap-3">
+          
+          <!-- User greeting -->
+          <div class="user-greeting d-none d-xl-block hide-on-scroll">
+            <small>Xin chào</small>
+            <strong><?php echo $display_username ?? 'Khách'; ?></strong>
+          </div>
+          
+          <!-- Đăng tin button -->
+          <a href="<?php echo $BASE_PATH; ?>/user/<?php echo $display_username ? 'user_dangtin.php' : 'dangnhap.php?next=user_dangtin.php'; ?>" class="btn-post d-none d-md-inline-block">
+            <i class="fa-solid fa-plus me-1"></i> Đăng tin
+          </a>
+          
+          <!-- User Icon with Dropdown -->
+          <div class="dropdown header-dropdown">
+            <?php if ($display_username): ?>
+              <a href="#" class="header-icon dropdown-toggle" id="userDropdownBtn" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="fa-solid fa-user"></i>
+              </a>
+              <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdownBtn">
+                <li><a class="dropdown-item" href="<?php echo $BASE_PATH; ?>/user/profile.php"><i class="fa-solid fa-user"></i> Hồ sơ</a></li>
+                <li><a class="dropdown-item" href="<?php echo $BASE_PATH; ?>/user/user_dashboard.php"><i class="fa-solid fa-gauge"></i> Tổng quan</a></li>
+                <li><a class="dropdown-item" href="<?php echo $BASE_PATH; ?>/user/user_quanlytin.php"><i class="fa-solid fa-list"></i> Quản lý tin</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item text-danger" href="<?php echo $BASE_PATH; ?>/user/dangxuat.php"><i class="fa-solid fa-right-from-bracket"></i> Đăng xuất</a></li>
+              </ul>
+            <?php else: ?>
+              <a href="<?php echo $BASE_PATH; ?>/user/dangnhap.php" class="header-icon" title="Đăng nhập">
+                <i class="fa-solid fa-user"></i>
+              </a>
+            <?php endif; ?>
+          </div>
+          
+          <!-- Favorites Icon -->
+          <a href="#" class="header-icon" data-bs-toggle="offcanvas" data-bs-target="#offcanvasFavorites">
+            <i class="fa-regular fa-heart"></i>
+            <span id="favorites-count" class="position-absolute badge rounded-pill d-none" style="font-size:11px;font-weight:700;min-width:20px;height:20px;line-height:20px;padding:0 6px;top:-6px;right:-8px;background:#ff4757;color:#fff;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,0.3);">0</span>
+          </a>
+          
+        </div>
+      </div>
+      
     </div>
   </div>
+</header>
 
-  <main>
+<!-- ===== OFFCANVAS FAVORITES ===== -->
+<div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasFavorites">
+  <div class="offcanvas-header">
+    <h5 class="offcanvas-title">Sản phẩm yêu thích</h5>
+    <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+  </div>
+  <div class="offcanvas-body">
+    <ul class="list-group" id="favorites-list">
+      <li class="list-group-item text-muted text-center">Chưa có sản phẩm</li>
+    </ul>
+    <button class="btn btn-outline-danger w-100 mt-3" id="clear-favorites">Xóa tất cả</button>
+  </div>
+</div>
+
+<!-- ===== OFFCANVAS SEARCH (Mobile) ===== -->
+<div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasSearch">
+  <div class="offcanvas-header">
+    <h5 class="offcanvas-title">Tìm kiếm</h5>
+    <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+  </div>
+  <div class="offcanvas-body">
+    <form action="<?php echo $BASE_PATH; ?>/index.php" method="get">
+      <div class="input-group">
+        <input type="text" name="query" class="form-control" placeholder="Tìm sản phẩm...">
+        <button class="btn btn-primary" type="submit">Tìm</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ===== BOOTSTRAP 5.3 JS Bundle (includes Popper) ===== -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
-// Load and display favorites from API when the favorites sidebar opens
+// Header scroll effect & Search toggle
 document.addEventListener('DOMContentLoaded', function() {
-  const favoritesOffcanvas = document.getElementById('offcanvasFavorites');
-  const favoritesList = document.getElementById('favorites-list');
-  const favoritesCountBadge = document.getElementById('favorites-count-badge');
-  const favoritesCount = document.getElementById('favorites-count');
-  const clearFavoritesBtn = document.getElementById('clear-favorites');
-  const BASE_PATH = '<?php echo $BASE_PATH; ?>';
-
-  // Load favorites from API
-  function loadFavorites() {
-    fetch(BASE_PATH + '/favorites/get_favorites.php')
-      .then(response => response.json())
-      .then(data => {
-        if (data.items && data.items.length > 0) {
-          let html = '';
-          data.items.forEach(item => {
-            const imageUrl = item.image || BASE_PATH + '/uploads/placeholder.png';
-            html += `
-              <li class="list-group-item d-flex justify-content-between align-items-center">
-                <div class="d-flex gap-2 align-items-center flex-grow-1">
-                  <img src="${imageUrl}" alt="${item.title}" class="rounded" style="width: 50px; height: 50px; object-fit: cover;">
-                  <div style="flex: 1;">
-                    <p class="mb-1 fw-bold" style="font-size: 14px;">${item.title}</p>
-                    <p class="mb-0 text-danger fw-bold">${item.price} đ</p>
-                  </div>
-                </div>
-                <button class="btn btn-sm btn-outline-danger" onclick="removeFavorite('${item.favorite_id}')">
-                  <i class="fa-solid fa-trash"></i>
-                </button>
-              </li>
-            `;
-          });
-          favoritesList.innerHTML = html;
-          favoritesCountBadge.textContent = data.items.length;
-          favoritesCount.textContent = data.items.length;
-          if (data.items.length > 0) {
-            favoritesCount.classList.remove('d-none');
-          }
-        } else {
-          favoritesList.innerHTML = '<li class="list-group-item text-center text-muted">Chưa có sản phẩm</li>';
-          favoritesCountBadge.textContent = '0';
-          favoritesCount.classList.add('d-none');
+  var header = document.getElementById('siteHeader');
+  var searchWrapper = document.getElementById('searchWrapper');
+  var searchIconBox = document.getElementById('searchIconBox');
+  var searchInput = document.getElementById('searchInput');
+  
+  // Scroll effect
+  window.addEventListener('scroll', function() {
+    if (window.scrollY > 50) {
+      header.classList.add('scrolled');
+    } else {
+      header.classList.remove('scrolled');
+      // Collapse search when scroll back to top
+      if (searchWrapper) {
+        searchWrapper.classList.remove('expanded');
+      }
+    }
+  });
+  
+  // Toggle search expand (only when scrolled)
+  if (searchIconBox) {
+    searchIconBox.addEventListener('click', function(e) {
+      if (header.classList.contains('scrolled')) {
+        e.preventDefault();
+        e.stopPropagation();
+        searchWrapper.classList.toggle('expanded');
+        if (searchWrapper.classList.contains('expanded')) {
+          setTimeout(function() {
+            searchInput.focus();
+          }, 100);
         }
-      })
-      .catch(error => console.error('Error loading favorites:', error));
-  }
-
-  // Load favorites when offcanvas is shown
-  if (favoritesOffcanvas) {
-    favoritesOffcanvas.addEventListener('show.bs.offcanvas', loadFavorites);
-  }
-
-  // Remove individual favorite
-  window.removeFavorite = function(favoriteId) {
-    fetch(BASE_PATH + '/favorites/handle_favorite.php', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: 'favorite_id=' + favoriteId + '&action=remove'
-    })
-    .then(() => loadFavorites())
-    .catch(error => console.error('Error removing favorite:', error));
-  };
-
-  // Clear all favorites
-  if (clearFavoritesBtn) {
-    clearFavoritesBtn.addEventListener('click', function() {
-      if (confirm('Bạn có chắc chắn muốn xóa tất cả sản phẩm yêu thích?')) {
-        fetch(BASE_PATH + '/favorites/handle_favorite.php', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-          body: 'action=clear_all'
-        })
-        .then(() => loadFavorites())
-        .catch(error => console.error('Error clearing favorites:', error));
       }
     });
   }
-
-  // Load favorites count on page load
-  loadFavorites();
-
-  // Header scroll effect
-  let scrollTimeout;
-  const header = document.querySelector('header');
-  const scrollThreshold = 100; // Khoảng cách scroll để kích hoạt hiệu ứng
-
-  function handleScroll() {
-    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-
-    if (scrollTop > scrollThreshold) {
-      // Scroll xuống - thu gọn header
-      header.classList.add('header-scrolled');
-    } else {
-      // Ở đầu trang - mở rộng header
-      header.classList.remove('header-scrolled');
+  
+  // Close search when clicking outside
+  document.addEventListener('click', function(e) {
+    if (searchWrapper && header.classList.contains('scrolled')) {
+      if (!searchWrapper.contains(e.target)) {
+        searchWrapper.classList.remove('expanded');
+      }
     }
-  }
-
-  // Debounce scroll event for better performance
-  window.addEventListener('scroll', function() {
-    clearTimeout(scrollTimeout);
-    scrollTimeout = setTimeout(handleScroll, 10);
   });
+  
+  // ===== FAVORITES FUNCTIONALITY =====
+  var favoritesList = document.getElementById('favorites-list');
+  var favoritesCount = document.getElementById('favorites-count');
+  var clearFavoritesBtn = document.getElementById('clear-favorites');
+  var basePath = '<?php echo $BASE_PATH; ?>';
+  
+  // Load favorites from database
+  function loadFavorites() {
+    fetch(basePath + '/favorites/get_favorites.php', { credentials: 'same-origin' })
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (!data || data.status !== 'success') return;
+        
+        var favorites = data.favorites || [];
+        
+        // Update count badge
+        if (favorites.length > 0) {
+          favoritesCount.textContent = favorites.length;
+          favoritesCount.classList.remove('d-none');
+        } else {
+          favoritesCount.classList.add('d-none');
+        }
+        
+        // Render list
+        if (favorites.length === 0) {
+          favoritesList.innerHTML = '<li class="list-group-item text-muted text-center py-4"><i class="fa-regular fa-heart fa-2x mb-2 d-block"></i>Chưa có sản phẩm yêu thích</li>';
+          clearFavoritesBtn.style.display = 'none';
+          return;
+        }
+        
+        clearFavoritesBtn.style.display = 'block';
+        var html = '';
+        favorites.forEach(function(item) {
+          var priceNum = parseFloat(item.price) || 0;
+          var priceText = priceNum > 0 
+            ? priceNum.toLocaleString('vi-VN') + ' đ'
+            : 'Thỏa thuận';
+          
+          // Xử lý đường dẫn ảnh
+          var imgSrc = item.image || 'images/default-product.jpg';
+          // Nếu chưa có basePath thì thêm vào
+          if (imgSrc.indexOf('http') !== 0 && imgSrc.indexOf(basePath) !== 0) {
+            imgSrc = basePath + '/' + imgSrc;
+          }
+          
+          html += '<li class="list-group-item d-flex align-items-center gap-3 favorite-item" data-product-id="' + item.product_id + '">' +
+            '<a href="' + basePath + '/product.php?id=' + item.product_id + '" class="flex-shrink-0">' +
+            '<img src="' + imgSrc + '" alt="" style="width:60px;height:60px;object-fit:cover;border-radius:8px;border:1px solid #eee;" onerror="this.src=\'' + basePath + '/images/default-product.jpg\'">' +
+            '</a>' +
+            '<div class="flex-grow-1 min-width-0">' +
+            '<a href="' + basePath + '/product.php?id=' + item.product_id + '" class="text-dark text-decoration-none">' +
+            '<h6 class="mb-1 text-truncate" style="font-size:14px;font-weight:600;">' + (item.title || 'Sản phẩm').replace(/</g, '&lt;') + '</h6>' +
+            '</a>' +
+            '<span style="font-size:15px;font-weight:700;color:#e53935;">' + priceText + '</span>' +
+            '</div>' +
+            '<button type="button" class="btn btn-sm btn-outline-danger remove-favorite-btn" data-product-id="' + item.product_id + '" title="Xóa" style="border-radius:50%;width:32px;height:32px;padding:0;display:flex;align-items:center;justify-content:center;">' +
+            '<i class="fa-solid fa-times"></i>' +
+            '</button>' +
+            '</li>';
+        });
+        favoritesList.innerHTML = html;
+      })
+      .catch(function() {});
+  }
+  
+  // Initial load
+  loadFavorites();
+  
+  // Expose refresh function globally
+  window.refreshFavoritesList = loadFavorites;
+  
+  // Remove single favorite
+  favoritesList.addEventListener('click', function(e) {
+    var btn = e.target.closest('.remove-favorite-btn');
+    if (!btn) return;
+    
+    e.preventDefault();
+    var productId = btn.getAttribute('data-product-id');
+    
+    var formData = new FormData();
+    formData.append('product_id', productId);
+    
+    fetch(basePath + '/favorites/handle_favorite.php', {
+      method: 'POST',
+      body: formData,
+      credentials: 'same-origin'
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data && data.status === 'success') {
+        loadFavorites();
+        // Update card on main page if exists
+        var card = document.querySelector('.product-card[data-product-id="' + productId + '"]');
+        if (card) {
+          var heartBtn = card.querySelector('.btn-wishlist');
+          if (heartBtn) heartBtn.classList.remove('favorited');
+        }
+      }
+    });
+  });
+  
+  // Clear all favorites
+  if (clearFavoritesBtn) {
+    clearFavoritesBtn.addEventListener('click', function() {
+      if (!confirm('Bạn có chắc muốn xóa tất cả sản phẩm yêu thích?')) return;
+      
+      fetch(basePath + '/favorites/clear_favorites.php', {
+        method: 'POST',
+        credentials: 'same-origin'
+      })
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (data && data.status === 'success') {
+          loadFavorites();
+          // Remove all favorited classes on main page
+          document.querySelectorAll('.btn-wishlist.favorited').forEach(function(btn) {
+            btn.classList.remove('favorited');
+          });
+        }
+      });
+    });
+  }
 });
 </script>

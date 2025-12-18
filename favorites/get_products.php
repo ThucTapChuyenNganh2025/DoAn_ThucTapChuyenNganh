@@ -11,12 +11,18 @@ $offset = isset($_GET['offset']) ? (int)$_GET['offset'] : 0;
 // Optional: list of product ids already rendered on client to avoid duplicates
 $exclude = isset($_GET['exclude_ids']) ? trim($_GET['exclude_ids']) : '';
 
-$sql = "SELECT DISTINCT p.id, p.title, p.description, p.price, p.currency, p.created_at, p.category_id, p.status, p.views, c.name AS category_name,
+$sql = "SELECT DISTINCT p.id, p.title, p.description, p.price, p.currency, p.created_at, p.category_id, p.status, p.views, 
+                c.name AS category_name,
+                u.name AS seller_name,
+                l.province AS location_province,
+                l.district AS location_district,
                 (
                     SELECT filename FROM product_images pi2 WHERE pi2.product_id = p.id ORDER BY pi2.sort_order ASC LIMIT 1
                 ) AS image_file
     FROM products p
     LEFT JOIN categories c ON p.category_id = c.id
+    LEFT JOIN users u ON p.seller_id = u.id
+    LEFT JOIN locations l ON p.location_id = l.id
     WHERE p.status = 'approved'";
 $params = [];
 if ($q !== '') {
@@ -25,10 +31,16 @@ if ($q !== '') {
     $params[] = $like; $params[] = $like;
 }
 if ($cat !== '') {
-    // Accept category by name (case-insensitive) or by slug, fuzzy match
-    $sql .= " AND (LOWER(c.name) LIKE LOWER(?) OR c.slug LIKE ?)";
-    $params[] = '%'.$cat.'%';
-    $params[] = '%'.$cat.'%';
+    // Hỗ trợ lọc theo category ID hoặc tên
+    if (is_numeric($cat)) {
+        $sql .= " AND p.category_id = ?";
+        $params[] = (int)$cat;
+    } else {
+        // Accept category by name (case-insensitive) or by slug, fuzzy match
+        $sql .= " AND (LOWER(c.name) LIKE LOWER(?) OR c.slug LIKE ?)";
+        $params[] = '%'.$cat.'%';
+        $params[] = '%'.$cat.'%';
+    }
 }
 // Exclude ids to avoid duplicates when client passes existing ids
 if ($exclude !== '') {
