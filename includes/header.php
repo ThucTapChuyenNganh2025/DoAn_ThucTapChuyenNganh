@@ -425,6 +425,7 @@ if ($cat_result && $cat_result->num_rows > 0) {
                 <li><a class="dropdown-item" href="<?php echo $BASE_PATH; ?>/user/profile.php"><i class="fa-solid fa-user"></i> Hồ sơ</a></li>
                 <li><a class="dropdown-item" href="<?php echo $BASE_PATH; ?>/user/user_dashboard.php"><i class="fa-solid fa-gauge"></i> Tổng quan</a></li>
                 <li><a class="dropdown-item" href="<?php echo $BASE_PATH; ?>/user/user_quanlytin.php"><i class="fa-solid fa-list"></i> Quản lý tin</a></li>
+                <li><a class="dropdown-item" href="<?php echo $BASE_PATH; ?>/user/messages.php"><i class="fa-solid fa-comments"></i> Tin nhắn</a></li>
                 <li><hr class="dropdown-divider"></li>
                 <li><a class="dropdown-item text-danger" href="<?php echo $BASE_PATH; ?>/user/dangxuat.php"><i class="fa-solid fa-right-from-bracket"></i> Đăng xuất</a></li>
               </ul>
@@ -434,6 +435,14 @@ if ($cat_result && $cat_result->num_rows > 0) {
               </a>
             <?php endif; ?>
           </div>
+          
+          <?php if ($display_username): ?>
+          <!-- Messages Icon -->
+          <a href="<?php echo $BASE_PATH; ?>/user/messages.php" class="header-icon position-relative" title="Tin nhắn" id="messagesIcon">
+            <i class="fa-regular fa-comment-dots"></i>
+            <span id="messages-count" class="position-absolute badge rounded-pill d-none" style="font-size:11px;font-weight:700;min-width:20px;height:20px;line-height:20px;padding:0 6px;top:-6px;right:-8px;background:#0084ff;color:#fff;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,0.3);">0</span>
+          </a>
+          <?php endif; ?>
           
           <!-- Favorites Icon -->
           <a href="#" class="header-icon" data-bs-toggle="offcanvas" data-bs-target="#offcanvasFavorites">
@@ -649,5 +658,196 @@ document.addEventListener('DOMContentLoaded', function() {
       });
     });
   }
+  
+  // ========== MESSAGE NOTIFICATIONS ==========
+  var messagesCountBadge = document.getElementById('messages-count');
+  var lastUnreadCount = 0;
+  var lastNotifiedMsgTime = localStorage.getItem('lastNotifiedMsgTime') || '';
+  
+  function checkNewMessages() {
+    fetch(basePath + '/api/get_unread_count.php', { credentials: 'same-origin' })
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (!data || data.status !== 'success') return;
+        
+        var count = data.count || 0;
+        
+        // Update badge
+        if (messagesCountBadge) {
+          if (count > 0) {
+            messagesCountBadge.textContent = count > 99 ? '99+' : count;
+            messagesCountBadge.classList.remove('d-none');
+          } else {
+            messagesCountBadge.classList.add('d-none');
+          }
+        }
+        
+        // Show notification if new message
+        if (data.latest && count > lastUnreadCount) {
+          var msgTime = data.latest.created_at || '';
+          if (msgTime && msgTime !== lastNotifiedMsgTime) {
+            showMessageNotification(data.latest);
+            lastNotifiedMsgTime = msgTime;
+            localStorage.setItem('lastNotifiedMsgTime', msgTime);
+          }
+        }
+        
+        lastUnreadCount = count;
+      })
+      .catch(function() {});
+  }
+  
+  function showMessageNotification(msg) {
+    // Remove old notification if exists
+    var oldNotif = document.querySelector('.msg-notification');
+    if (oldNotif) oldNotif.remove();
+    
+    // Create notification element
+    var notif = document.createElement('div');
+    notif.className = 'msg-notification';
+    notif.innerHTML = 
+      '<div class="msg-notif-icon"><i class="fa-solid fa-comment-dots"></i></div>' +
+      '<div class="msg-notif-content">' +
+        '<div class="msg-notif-title">' + escapeHtml(msg.sender_name) + '</div>' +
+        '<div class="msg-notif-text">' + escapeHtml(msg.message) + '</div>' +
+        '<div class="msg-notif-product"><i class="fa-solid fa-box fa-xs me-1"></i>' + escapeHtml(msg.product_title) + '</div>' +
+      '</div>' +
+      '<button class="msg-notif-close" onclick="this.parentElement.remove()">&times;</button>';
+    
+    // Notification click - go to messages
+    notif.addEventListener('click', function(e) {
+      if (e.target.classList.contains('msg-notif-close')) return;
+      window.location.href = basePath + '/user/messages.php?product_id=' + msg.product_id + '&user_id=' + msg.other_user_id;
+    });
+    
+    document.body.appendChild(notif);
+    
+    // Play sound (optional)
+    try {
+      var audio = new Audio('data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4Ljc2LjEwMAAAAAAAAAAAAAAA//tQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWGluZwAAAA8AAAACAAABhgC7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7//////////////////////////////////////////////////////////////////8AAAAATGF2YzU4LjEzAAAAAAAAAAAAAAAAJAAAAAAAAAAAAYbFX5PXAAAAAAAAAAAAAAAAAAAAAP/7UMQAA8AAADSAAAAAAgAABpAAAAEQAAADKAAAAAQAAAEgAAAD//7UMQGg8AAADSAAAAACAAAmkAAAAX//7UMQMg8AAADSAAAAACAAAmkAAAAX//7UMQQg8AAADSAAAAACAAAmkAAAAX//7UMQVg8AAADSAAAAACAAAmkAAAAX//7UMQag8AAADSAAAAACAAAmkAAAAX//7UMQfg8AAADSAAAAACAAAmkAAAAX//7UMQkg8AAADSAAAAACAAAmkAAAAX');
+      audio.volume = 0.5;
+      audio.play();
+    } catch(e) {}
+    
+    // Auto hide after 5 seconds
+    setTimeout(function() {
+      if (notif.parentElement) {
+        notif.style.animation = 'slideOutRight 0.3s ease forwards';
+        setTimeout(function() { notif.remove(); }, 300);
+      }
+    }, 5000);
+  }
+  
+  function escapeHtml(text) {
+    if (!text) return '';
+    var div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+  }
+  
+  // Check messages every 10 seconds
+  if (messagesCountBadge) {
+    checkNewMessages();
+    setInterval(checkNewMessages, 10000);
+  }
 });
 </script>
+
+<!-- Message Notification Styles -->
+<style>
+.msg-notification {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 340px;
+  max-width: calc(100vw - 40px);
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 5px 30px rgba(0,0,0,0.2);
+  display: flex;
+  align-items: flex-start;
+  padding: 16px;
+  z-index: 9999;
+  cursor: pointer;
+  animation: slideInRight 0.3s ease;
+  border-left: 4px solid #0084ff;
+}
+
+@keyframes slideInRight {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes slideOutRight {
+  from { transform: translateX(0); opacity: 1; }
+  to { transform: translateX(100%); opacity: 0; }
+}
+
+.msg-notif-icon {
+  width: 44px;
+  height: 44px;
+  background: linear-gradient(135deg, #0084ff 0%, #0066cc 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 18px;
+  flex-shrink: 0;
+  margin-right: 12px;
+}
+
+.msg-notif-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.msg-notif-title {
+  font-weight: 600;
+  color: #050505;
+  font-size: 14px;
+  margin-bottom: 4px;
+}
+
+.msg-notif-text {
+  color: #65676b;
+  font-size: 13px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 4px;
+}
+
+.msg-notif-product {
+  font-size: 11px;
+  color: #0084ff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.msg-notif-close {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 24px;
+  height: 24px;
+  border: none;
+  background: #f0f2f5;
+  border-radius: 50%;
+  font-size: 16px;
+  color: #65676b;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.msg-notif-close:hover {
+  background: #e4e6eb;
+}
+
+.msg-notification:hover {
+  box-shadow: 0 8px 40px rgba(0,0,0,0.25);
+}
+</style>

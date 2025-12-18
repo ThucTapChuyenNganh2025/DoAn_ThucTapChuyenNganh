@@ -362,7 +362,8 @@ if ($stmt = $conn->prepare($sql)) {
     </div>
     <?php endif; ?>
     
-    <div class="row" id="posts-container" data-limit="<?php echo $limit; ?>" data-query="<?php echo htmlspecialchars($search_query, ENT_QUOTES, 'UTF-8'); ?>" data-category="<?php echo $category_id; ?>"><?php if (!empty($posts)): ?>
+    <div class="row" id="posts-container" data-limit="<?php echo $limit; ?>" data-query="<?php echo htmlspecialchars($search_query, ENT_QUOTES, 'UTF-8'); ?>" data-category="<?php echo $category_id; ?>">
+      <?php if (!empty($posts)): ?>
         <?php foreach ($posts as $p):
           $title = htmlspecialchars($p['title'] ?? '', ENT_QUOTES, 'UTF-8');
           $img = sm_db_image($p['image_file'] ?? '');
@@ -653,5 +654,3 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 
 <?php require_once __DIR__ . '/includes/footer.php'; ?>
-</body>
-</html>

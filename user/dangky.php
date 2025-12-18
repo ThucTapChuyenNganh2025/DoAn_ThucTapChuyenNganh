@@ -38,28 +38,57 @@ if (isset($_POST['create'])) {
 
         if ($result->num_rows > 0) {
             echo '<div class="alert alert-danger text-center">Email này đã tồn tại!</div>';
+            $check->close();
         } else {
-            // Hash mật khẩu
-            $password_hash = password_hash($password, PASSWORD_BCRYPT);
-
-            // Thêm user mới
-            $stmt = $conn->prepare("INSERT INTO users (name, email, phone, password, bio, location_id, is_verified, created_at) 
-                                    VALUES (?, ?, ?, ?, ?, ?, 0, NOW())");
-            $stmt->bind_param("sssssi", $name, $email, $phone, $password_hash, $bio, $location_id);
-
-            if ($stmt->execute()) {
-                // Chuyển hướng sang trang đăng nhập
-                echo '<script>
-                        alert("Đăng ký thành công! Email: ' . htmlspecialchars($email) . '");
-                        window.location.href = "dangnhap.php";
-                      </script>';
-                exit();
+            $check->close();
+            
+            // Kiểm tra số điện thoại đã tồn tại chưa
+            $check_phone = $conn->prepare("SELECT id FROM users WHERE phone = ?");
+            $check_phone->bind_param("s", $phone);
+            $check_phone->execute();
+            $phone_result = $check_phone->get_result();
+            
+            if ($phone_result->num_rows > 0) {
+                echo '<div class="alert alert-danger text-center">Số điện thoại này đã được sử dụng!</div>';
+                $check_phone->close();
             } else {
-                echo '<div class="alert alert-danger text-center">Có lỗi xảy ra khi đăng ký!</div>';
+                $check_phone->close();
+                
+                // Hash mật khẩu
+                $password_hash = password_hash($password, PASSWORD_BCRYPT);
+
+                // Thêm user mới
+                $stmt = $conn->prepare("INSERT INTO users (name, email, phone, password, bio, location_id, is_verified, created_at) 
+                                        VALUES (?, ?, ?, ?, ?, ?, 0, NOW())");
+                $stmt->bind_param("sssssi", $name, $email, $phone, $password_hash, $bio, $location_id);
+
+                try {
+                    if ($stmt->execute()) {
+                        // Chuyển hướng sang trang đăng nhập
+                        echo '<script>
+                                alert("Đăng ký thành công! Email: ' . htmlspecialchars($email) . '");
+                                window.location.href = "dangnhap.php";
+                              </script>';
+                        exit();
+                    } else {
+                        echo '<div class="alert alert-danger text-center">Có lỗi xảy ra khi đăng ký!</div>';
+                    }
+                } catch (mysqli_sql_exception $e) {
+                    if (strpos($e->getMessage(), 'Duplicate entry') !== false) {
+                        if (strpos($e->getMessage(), 'phone') !== false) {
+                            echo '<div class="alert alert-danger text-center">Số điện thoại này đã được sử dụng!</div>';
+                        } elseif (strpos($e->getMessage(), 'email') !== false) {
+                            echo '<div class="alert alert-danger text-center">Email này đã tồn tại!</div>';
+                        } else {
+                            echo '<div class="alert alert-danger text-center">Thông tin đã tồn tại trong hệ thống!</div>';
+                        }
+                    } else {
+                        echo '<div class="alert alert-danger text-center">Có lỗi xảy ra: ' . htmlspecialchars($e->getMessage()) . '</div>';
+                    }
+                }
+                $stmt->close();
             }
-            $stmt->close();
         }
-        $check->close();
     }
 }
 ?>

@@ -1622,3 +1622,58 @@ $(document).ready(function () {
     renderCartIntoOffcanvas();
   });
 });
+
+// Search form - support both form IDs
+['search-form', 'headerSearchForm'].forEach(function(formId) {
+  var form = document.getElementById(formId);
+  if (!form) return;
+  
+  // Form submit sẽ hoạt động bình thường (GET đến index.php)
+  // Nếu muốn AJAX search, uncomment đoạn bên dưới
+  
+  /*
+  form.addEventListener('submit', function(e){
+    e.preventDefault();
+
+    const keyword = form.querySelector('[name="query"]')?.value.trim() || '';
+    const categoryId = form.querySelector('[name="category"]')?.value || '';
+
+    fetch(`api/search_products.php?keyword=${encodeURIComponent(keyword)}&category_id=${categoryId}`)
+      .then(r => r.json())
+      .then(resp => {
+        const wrapper = document.querySelector('#search-results-section .swiper-wrapper');
+        if (!wrapper) return;
+        wrapper.innerHTML = '';
+
+        if (!resp || resp.status !== 'success' || resp.products.length === 0) {
+          wrapper.innerHTML = `<div class="swiper-slide no-results p-3">Không tìm thấy sản phẩm</div>`;
+          return;
+        }
+
+        resp.products.forEach(p => {
+          const imgSrc = p.image || 'images/default-product.jpg';
+          const price = Number(p.price) > 0 
+            ? Number(p.price).toLocaleString('vi-VN') + ' ' + (p.currency || 'đ')
+            : 'Thỏa thuận';
+          
+          wrapper.innerHTML += `
+            <div class="swiper-slide">
+              <div class="product-item border p-3 h-100" data-product-id="${p.id}">
+                <figure class="text-center mb-3">
+                  <a href="product.php?id=${p.id}">
+                    <img src="${imgSrc}" class="tab-image" alt="${p.title}">
+                  </a>
+                </figure>
+                <h3 class="product-name">${p.title}</h3>
+                <span class="price d-block mt-2 text-success fw-bold">${price}</span>
+              </div>
+            </div>`;
+        });
+
+        if (window.searchResultsSwiper) window.searchResultsSwiper.update();
+      });
+  });
+  */
+});
+
+
