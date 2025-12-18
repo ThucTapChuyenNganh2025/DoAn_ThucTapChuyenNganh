@@ -12,11 +12,12 @@ if(isset($_POST['btn_dangtin'])) {
     $price = $_POST['price'];
     $desc = $conn->real_escape_string($_POST['description']);
     $cate_id = $_POST['category_id'];
+    $location_id = isset($_POST['location_id']) && $_POST['location_id'] ? (int)$_POST['location_id'] : 'NULL';
     $seller_id = $_SESSION['user_id'];
 
     // 1) Thêm sản phẩm vào bảng `products`
-    $sql_product = "INSERT INTO products (seller_id, category_id, title, description, price, status)
-                    VALUES ('$seller_id', '$cate_id', '$title', '$desc', '$price', 'pending')";
+    $sql_product = "INSERT INTO products (seller_id, category_id, location_id, title, description, price, status)
+                    VALUES ('$seller_id', '$cate_id', $location_id, '$title', '$desc', '$price', 'pending')";
 
     if ($conn->query($sql_product) === TRUE) {
         // Lấy ID sản phẩm vừa tạo
@@ -233,7 +234,7 @@ if(isset($_POST['btn_dangtin'])) {
                     <h5 class="sidebar-title"><i class="fa-solid fa-user-gear me-2"></i>Menu</h5>
                     <ul class="sidebar-menu">
                         <li><a href="profile.php"><i class="fa-solid fa-user"></i> Hồ sơ cá nhân</a></li>
-                        <li><a href="user_dashboard.php"><i class="fa-solid fa-gauge"></i> Dashboard</a></li>
+                        <li><a href="user_dashboard.php"><i class="fa-solid fa-gauge"></i> Tổng quan</a></li>
                         <li><a href="user_dangtin.php" class="active"><i class="fa-solid fa-plus"></i> Đăng tin mới</a></li>
                         <li><a href="user_quanlytin.php"><i class="fa-solid fa-list"></i> Quản lý tin</a></li>
                         <li><a href="doimk.php"><i class="fa-solid fa-key"></i> Đổi mật khẩu</a></li>
@@ -279,6 +280,17 @@ if(isset($_POST['btn_dangtin'])) {
                                             </div>
                                         </div>
                                     </div>
+                                    
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <div class="form-group">
+                                                <label class="form-label"><i class="fa-solid fa-location-dot me-2" style="color: #f6c23e;"></i>Tỉnh/Thành phố</label>
+                                                <select name="location_id" id="provinceSelect" class="form-select" required>
+                                                    <option value="">-- Chọn tỉnh/thành --</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
 
                                     <div class="form-group">
                                         <label class="form-label"><i class="fa-solid fa-align-left me-2" style="color: #f6c23e;"></i>Mô tả chi tiết</label>
@@ -312,4 +324,28 @@ if(isset($_POST['btn_dangtin'])) {
     </div>
 </div>
 
-<?php include_once dirname(__DIR__) . '/includes/footer.php'; ?>
+<script>
+// Load danh sách tỉnh/thành từ database
+fetch('../favorites/get_locations.php')
+    .then(r => r.json())
+    .then(data => {
+        if (data.status === 'success' && data.locations) {
+            const provinceSelect = document.getElementById('provinceSelect');
+            // Lấy danh sách tỉnh duy nhất và lấy location_id đầu tiên của mỗi tỉnh
+            const provinceMap = {};
+            data.locations.forEach(l => {
+                if (!provinceMap[l.province]) {
+                    provinceMap[l.province] = l.id;
+                }
+            });
+            
+            const provinces = Object.keys(provinceMap).sort();
+            provinces.forEach(p => {
+                provinceSelect.innerHTML += `<option value="${provinceMap[p]}">${p}</option>`;
+            });
+        }
+    })
+    .catch(err => console.error('Lỗi load locations:', err));
+</script>
+
+

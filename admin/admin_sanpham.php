@@ -91,6 +91,7 @@ if (!isset($_SESSION['admin_id'])) {
     <a href="admin_duyettin.php"><i class="fa-solid fa-chart-pie"></i> Tổng Quan</a>
     <a href="admin_sanpham.php" class="active"><i class="fa-solid fa-box"></i> Kho Sản Phẩm</a>
     <a href="admin_users.php"><i class="fa-solid fa-users-gear"></i> Quản Lý User</a>
+    <a href="admin_reports.php"><i class="fa-solid fa-flag"></i> Báo Cáo Vi Phạm</a>
     
     <a href="dangxuatadmin.php" class="logout-btn">
         <i class="fa-solid fa-right-from-bracket"></i> Đăng Xuất

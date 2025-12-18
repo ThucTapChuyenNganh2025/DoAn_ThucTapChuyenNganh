@@ -26,6 +26,16 @@ if ($result->num_rows == 0) {
 }
 $row = $result->fetch_assoc();
 
+// Lấy thông tin location hiện tại
+$current_location = null;
+if (!empty($row['location_id'])) {
+    $loc_sql = "SELECT id, province, district FROM locations WHERE id = " . (int)$row['location_id'];
+    $loc_res = $conn->query($loc_sql);
+    if ($loc_res && $loc_res->num_rows > 0) {
+        $current_location = $loc_res->fetch_assoc();
+    }
+}
+
 // 4. Lấy ảnh thumbnail từ bảng product_images
 $sql_img = "SELECT filename FROM product_images WHERE product_id = $id ORDER BY sort_order ASC LIMIT 1";
 $img_row = $conn->query($sql_img)->fetch_assoc();
@@ -41,6 +51,7 @@ if (isset($_POST['btn_update'])) {
     $price = $_POST['price'];
     $desc  = $conn->real_escape_string($_POST['description']);
     $cate_id = $_POST['category_id'];
+    $location_id = isset($_POST['location_id']) && $_POST['location_id'] ? (int)$_POST['location_id'] : 'NULL';
 
     // CHECK nếu upload ảnh mới
     if (isset($_FILES['image']) && $_FILES['image']['error'] == 0) {
@@ -65,8 +76,8 @@ if (isset($_POST['btn_update'])) {
         }
     }
 
-    // Cập nhật thông tin sản phẩm (không cập nhật cột image vì không tồn tại)
-    $sql_update = "UPDATE products SET title='$title', price='$price', description='$desc', category_id='$cate_id', status='pending' WHERE id=$id AND seller_id=$my_id";
+    // Cập nhật thông tin sản phẩm (giữ nguyên status, không cần admin duyệt lại)
+    $sql_update = "UPDATE products SET title='$title', price='$price', description='$desc', category_id='$cate_id', location_id=$location_id WHERE id=$id AND seller_id=$my_id";
 
     if ($conn->query($sql_update) === TRUE) {
         echo "<script>
@@ -274,7 +285,7 @@ if (isset($_POST['btn_update'])) {
                     <h5 class="sidebar-title"><i class="fa-solid fa-user-gear me-2"></i>Menu</h5>
                     <ul class="sidebar-menu">
                         <li><a href="profile.php"><i class="fa-solid fa-user"></i> Hồ sơ cá nhân</a></li>
-                        <li><a href="user_dashboard.php"><i class="fa-solid fa-gauge"></i> Dashboard</a></li>
+                        <li><a href="user_dashboard.php"><i class="fa-solid fa-gauge"></i> Tổng quan</a></li>
                         <li><a href="user_dangtin.php"><i class="fa-solid fa-plus"></i> Đăng tin mới</a></li>
                         <li><a href="user_quanlytin.php" class="active"><i class="fa-solid fa-list"></i> Quản lý tin</a></li>
                         <li><a href="doimk.php"><i class="fa-solid fa-key"></i> Đổi mật khẩu</a></li>
@@ -321,6 +332,17 @@ if (isset($_POST['btn_update'])) {
                                             </div>
                                         </div>
                                     </div>
+                                    
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <div class="form-group">
+                                                <label class="form-label"><i class="fa-solid fa-location-dot me-2" style="color: #f6c23e;"></i>Tỉnh/Thành phố</label>
+                                                <select name="location_id" id="provinceSelect" class="form-select" required>
+                                                    <option value="">-- Chọn tỉnh/thành --</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
 
                                     <div class="form-group">
                                         <label class="form-label"><i class="fa-solid fa-align-left me-2" style="color: #f6c23e;"></i>Mô tả chi tiết</label>
@@ -362,4 +384,33 @@ if (isset($_POST['btn_update'])) {
     </div>
 </div>
 
-<?php include_once dirname(__DIR__) . '/includes/footer.php'; ?>
+<script>
+// Load danh sách tỉnh/thành từ database
+const currentLocationId = <?php echo json_encode($current_location ? (int)$current_location['id'] : null); ?>;
+const currentProvince = <?php echo json_encode($current_location ? $current_location['province'] : ''); ?>;
+
+fetch('../favorites/get_locations.php')
+    .then(r => r.json())
+    .then(data => {
+        if (data.status === 'success' && data.locations) {
+            const provinceSelect = document.getElementById('provinceSelect');
+            // Lấy danh sách tỉnh duy nhất và lấy location_id đầu tiên của mỗi tỉnh
+            const provinceMap = {};
+            data.locations.forEach(l => {
+                if (!provinceMap[l.province]) {
+                    provinceMap[l.province] = l.id;
+                }
+            });
+            
+            const provinces = Object.keys(provinceMap).sort();
+            provinces.forEach(p => {
+                // Nếu tỉnh này khớp với tỉnh hiện tại, dùng currentLocationId
+                const locId = (p === currentProvince && currentLocationId) ? currentLocationId : provinceMap[p];
+                const selected = (p === currentProvince) ? 'selected' : '';
+                provinceSelect.innerHTML += `<option value="${locId}" ${selected}>${p}</option>`;
+            });
+        }
+    })
+    .catch(err => console.error('Lỗi load locations:', err));
+</script>
+

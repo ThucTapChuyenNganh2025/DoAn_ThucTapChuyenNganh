@@ -75,9 +75,15 @@ if (!$location) $location = 'Chưa cập nhật';
 
 $createdAt = !empty($p['created_at']) ? date('d/m/Y H:i', strtotime($p['created_at'])) : '';
 
+// Kiểm tra đây có phải bài đăng của mình không
+$isOwner = false;
+if (isset($_SESSION['user_id']) && $_SESSION['user_id'] == $p['seller_id']) {
+  $isOwner = true;
+}
+
 // Kiểm tra đã yêu thích chưa
 $isFavorited = false;
-if (isset($_SESSION['user_id'])) {
+if (isset($_SESSION['user_id']) && !$isOwner) {
   $fav_sql = "SELECT id FROM favorites WHERE user_id = ? AND product_id = ?";
   $fav_stmt = $conn->prepare($fav_sql);
   $fav_stmt->bind_param('ii', $_SESSION['user_id'], $id);
@@ -276,6 +282,108 @@ if (isset($_SESSION['user_id'])) {
     font-size: 22px;
   }
 }
+
+/* Rating Styles */
+.rating-big {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+}
+.rating-big .rating-number {
+  font-size: 48px;
+  font-weight: 700;
+  color: #1a1a2e;
+}
+.rating-big .rating-star {
+  font-size: 36px;
+  color: #f6c23e;
+}
+.rating-total {
+  font-size: 14px;
+}
+.rating-bar-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.rating-bar-item .star-label {
+  width: 40px;
+  font-size: 13px;
+  color: #666;
+}
+.rating-bar-item .progress {
+  height: 8px;
+  border-radius: 4px;
+  background: #e9ecef;
+}
+.rating-bar-item .count-label {
+  width: 30px;
+  text-align: right;
+  font-size: 12px;
+  color: #888;
+}
+
+/* Star Rating Input */
+.star-rating-input {
+  font-size: 28px;
+  cursor: pointer;
+}
+.star-rating-input .star-input {
+  color: #ddd;
+  transition: color 0.2s;
+  padding: 0 2px;
+}
+.star-rating-input .star-input:hover,
+.star-rating-input .star-input.active {
+  color: #f6c23e;
+}
+
+/* Rating Item */
+.rating-item {
+  padding: 15px;
+  border-bottom: 1px solid #f0f0f0;
+}
+.rating-item:last-child {
+  border-bottom: none;
+}
+.rating-item-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.rating-item-avatar {
+  width: 36px;
+  height: 36px;
+  background: #e9ecef;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  color: #666;
+}
+.rating-item-name {
+  font-weight: 600;
+  color: #333;
+}
+.rating-item-stars {
+  color: #f6c23e;
+  font-size: 14px;
+}
+.rating-item-date {
+  font-size: 12px;
+  color: #888;
+  margin-left: auto;
+}
+.rating-item-comment {
+  color: #555;
+  font-size: 14px;
+  line-height: 1.5;
+  margin-left: 46px;
+}
 </style>
 
 <section class="product-detail-section">
@@ -355,41 +463,177 @@ if (isset($_SESSION['user_id'])) {
             </div>
             <div>
               <div class="seller-name"><?php echo $sellerName; ?></div>
-              <div class="seller-contact">Người bán</div>
+              <div class="seller-contact"><?php echo $isOwner ? 'Tin đăng của bạn' : 'Người bán'; ?></div>
             </div>
           </div>
           
-          <?php if (isset($_SESSION['user_id'])): ?>
+          <?php if ($isOwner): ?>
+          <!-- Chủ bài đăng - hiển thị nút quản lý -->
+          <a href="<?php echo $BASE_PATH; ?>/user/user_sua_tin.php?id=<?php echo $id; ?>" class="btn btn-contact btn-chat">
+            <i class="fa-solid fa-pen-to-square"></i> Sửa tin đăng
+          </a>
+          <a href="<?php echo $BASE_PATH; ?>/user/user_quanlytin.php" class="btn btn-contact btn-phone" style="background: #6c757d;">
+            <i class="fa-solid fa-list-check"></i> Quản lý tin đăng
+          </a>
+          <a href="<?php echo $BASE_PATH; ?>/user/messages.php" class="btn btn-contact btn-favorite" style="background: #fff; border: 2px solid #0d6efd; color: #0d6efd;">
+            <i class="fa-regular fa-comment-dots"></i> Xem tin nhắn
+          </a>
+          <?php elseif (isset($_SESSION['user_id'])): ?>
+          <!-- Người dùng khác đã đăng nhập -->
           <a href="<?php echo $BASE_PATH; ?>/user/messages.php?product_id=<?php echo $id; ?>&user_id=<?php echo (int)$p['seller_id']; ?>" class="btn btn-contact btn-chat">
             <i class="fa-regular fa-comment-dots"></i> Chat với người bán
           </a>
-          <?php else: ?>
-          <a href="<?php echo $BASE_PATH; ?>/user/dangnhap.php" class="btn btn-contact btn-chat">
-            <i class="fa-regular fa-comment-dots"></i> Chat với người bán
-          </a>
-          <?php endif; ?>
-          
           <?php if ($sellerPhone): ?>
           <a href="tel:<?php echo $sellerPhone; ?>" class="btn btn-contact btn-phone">
             <i class="fa-solid fa-phone"></i> <?php echo $sellerPhone; ?>
           </a>
           <?php endif; ?>
-          
           <button class="btn btn-contact btn-favorite <?php echo $isFavorited ? 'favorited' : ''; ?>" id="btnFavorite" data-product-id="<?php echo $id; ?>">
             <i class="fa-<?php echo $isFavorited ? 'solid' : 'regular'; ?> fa-heart"></i>
             <span><?php echo $isFavorited ? 'Đã lưu tin' : 'Lưu tin'; ?></span>
           </button>
+          <?php else: ?>
+          <!-- Chưa đăng nhập -->
+          <a href="<?php echo $BASE_PATH; ?>/user/dangnhap.php" class="btn btn-contact btn-chat">
+            <i class="fa-regular fa-comment-dots"></i> Chat với người bán
+          </a>
+          <?php if ($sellerPhone): ?>
+          <a href="tel:<?php echo $sellerPhone; ?>" class="btn btn-contact btn-phone">
+            <i class="fa-solid fa-phone"></i> <?php echo $sellerPhone; ?>
+          </a>
+          <?php endif; ?>
+          <a href="<?php echo $BASE_PATH; ?>/user/dangnhap.php" class="btn btn-contact btn-favorite">
+            <i class="fa-regular fa-heart"></i>
+            <span>Lưu tin</span>
+          </a>
+          <?php endif; ?>
         </div>
         
-        <!-- Warning -->
+        <!-- Warning (chỉ hiện cho người mua) -->
+        <?php if (!$isOwner): ?>
         <div class="alert alert-warning mt-3" style="font-size: 13px;">
           <i class="fa-solid fa-triangle-exclamation me-2"></i>
           <strong>Lưu ý:</strong> Để tránh rủi ro, hãy gặp mặt trực tiếp và kiểm tra hàng trước khi thanh toán.
+        </div>
+        <?php endif; ?>
+        
+        <!-- Report Button -->
+        <?php if (isset($_SESSION['user_id']) && !$isOwner): ?>
+        <button class="btn btn-outline-danger btn-sm mt-2" id="btnReport" data-bs-toggle="modal" data-bs-target="#reportModal">
+          <i class="fa-solid fa-flag me-1"></i> Báo cáo tin đăng
+        </button>
+        <?php endif; ?>
+      </div>
+    </div>
+    
+    <!-- Ratings Section -->
+    <div class="row mt-4">
+      <div class="col-12">
+        <div class="product-description" id="ratingsSection">
+          <h5><i class="fa-solid fa-star me-2"></i>Đánh giá người bán</h5>
+          
+          <!-- Rating Summary -->
+          <div class="row mb-4">
+            <div class="col-md-4 text-center">
+              <div class="rating-big" id="ratingAverage">
+                <span class="rating-number">0</span>
+                <span class="rating-star">★</span>
+              </div>
+              <div class="rating-total text-muted"><span id="ratingTotal">0</span> đánh giá</div>
+            </div>
+            <div class="col-md-8">
+              <div class="rating-bars" id="ratingBars">
+                <?php for($i = 5; $i >= 1; $i--): ?>
+                <div class="rating-bar-item">
+                  <span class="star-label"><?php echo $i; ?> ★</span>
+                  <div class="progress flex-grow-1">
+                    <div class="progress-bar bg-warning" id="bar<?php echo $i; ?>" style="width: 0%"></div>
+                  </div>
+                  <span class="count-label" id="count<?php echo $i; ?>">0</span>
+                </div>
+                <?php endfor; ?>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Rating Form -->
+          <?php if (isset($_SESSION['user_id']) && $_SESSION['user_id'] != $p['seller_id']): ?>
+          <div class="rating-form-wrapper mb-4 p-3 bg-light rounded">
+            <h6 class="mb-3">Đánh giá của bạn</h6>
+            <div class="star-rating-input mb-3" id="starRatingInput">
+              <?php for($i = 1; $i <= 5; $i++): ?>
+              <span class="star-input" data-value="<?php echo $i; ?>">☆</span>
+              <?php endfor; ?>
+              <input type="hidden" id="ratingValue" value="0">
+            </div>
+            <textarea class="form-control mb-2" id="ratingComment" rows="2" placeholder="Nhận xét về người bán (không bắt buộc)"></textarea>
+            <button class="btn btn-primary btn-sm" id="submitRating">
+              <i class="fa-solid fa-paper-plane me-1"></i> Gửi đánh giá
+            </button>
+          </div>
+          <?php elseif (!isset($_SESSION['user_id'])): ?>
+          <div class="alert alert-info mb-4">
+            <a href="<?php echo $BASE_PATH; ?>/user/dangnhap.php">Đăng nhập</a> để đánh giá người bán
+          </div>
+          <?php endif; ?>
+          
+          <!-- Rating List -->
+          <div id="ratingsList">
+            <p class="text-muted">Đang tải đánh giá...</p>
+          </div>
         </div>
       </div>
     </div>
   </div>
 </section>
+
+<!-- Report Modal -->
+<div class="modal fade" id="reportModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="fa-solid fa-flag text-danger me-2"></i>Báo cáo tin đăng</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p class="text-muted mb-3">Vui lòng cho chúng tôi biết lý do bạn báo cáo tin đăng này:</p>
+        
+        <div class="mb-3">
+          <div class="form-check mb-2">
+            <input class="form-check-input" type="radio" name="reportReason" id="reason1" value="Tin đăng giả mạo, lừa đảo">
+            <label class="form-check-label" for="reason1">Tin đăng giả mạo, lừa đảo</label>
+          </div>
+          <div class="form-check mb-2">
+            <input class="form-check-input" type="radio" name="reportReason" id="reason2" value="Hàng hóa bị cấm bán">
+            <label class="form-check-label" for="reason2">Hàng hóa bị cấm bán</label>
+          </div>
+          <div class="form-check mb-2">
+            <input class="form-check-input" type="radio" name="reportReason" id="reason3" value="Thông tin sai sự thật">
+            <label class="form-check-label" for="reason3">Thông tin sai sự thật</label>
+          </div>
+          <div class="form-check mb-2">
+            <input class="form-check-input" type="radio" name="reportReason" id="reason4" value="Trùng lặp, spam">
+            <label class="form-check-label" for="reason4">Trùng lặp, spam</label>
+          </div>
+          <div class="form-check mb-2">
+            <input class="form-check-input" type="radio" name="reportReason" id="reason5" value="other">
+            <label class="form-check-label" for="reason5">Lý do khác</label>
+          </div>
+        </div>
+        
+        <div id="otherReasonWrapper" style="display: none;">
+          <textarea class="form-control" id="otherReason" rows="3" placeholder="Mô tả chi tiết lý do báo cáo (tối thiểu 10 ký tự)"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+        <button type="button" class="btn btn-danger" id="submitReport">
+          <i class="fa-solid fa-flag me-1"></i> Gửi báo cáo
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <script>
 const basePath = <?php echo json_encode($BASE_PATH); ?>;
@@ -404,40 +648,235 @@ function changeImage(thumb, src) {
 }
 
 // Favorite functionality
-document.getElementById('btnFavorite').onclick = function() {
-  var btn = this;
-  var productId = btn.getAttribute('data-product-id');
-  
-  var formData = new FormData();
-  formData.append('product_id', productId);
-  
-  fetch('<?php echo $BASE_PATH; ?>/favorites/handle_favorite.php', {
-    method: 'POST',
-    body: formData,
-    credentials: 'same-origin'
-  })
-  .then(function(r) { return r.json(); })
-  .then(function(data) {
-    if (data && data.status === 'success') {
-      if (data.action === 'added') {
-        btn.classList.add('favorited');
-        btn.innerHTML = '<i class="fa-solid fa-heart"></i> <span>Đã lưu tin</span>';
-      } else {
-        btn.classList.remove('favorited');
-        btn.innerHTML = '<i class="fa-regular fa-heart"></i> <span>Lưu tin</span>';
+var btnFavorite = document.getElementById('btnFavorite');
+if (btnFavorite) {
+  btnFavorite.onclick = function() {
+    var btn = this;
+    var productId = btn.getAttribute('data-product-id');
+    
+    var formData = new FormData();
+    formData.append('product_id', productId);
+    
+    fetch('<?php echo $BASE_PATH; ?>/favorites/handle_favorite.php', {
+      method: 'POST',
+      body: formData,
+      credentials: 'same-origin'
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data && data.status === 'success') {
+        if (data.action === 'added') {
+          btn.classList.add('favorited');
+          btn.innerHTML = '<i class="fa-solid fa-heart"></i> <span>Đã lưu tin</span>';
+        } else {
+          btn.classList.remove('favorited');
+          btn.innerHTML = '<i class="fa-regular fa-heart"></i> <span>Lưu tin</span>';
+        }
+        if (typeof window.refreshFavoritesList === 'function') {
+          window.refreshFavoritesList();
+        }
+      } else if (data && data.require_login) {
+        alert('Bạn cần đăng nhập để lưu tin!');
+        window.location.href = '<?php echo $BASE_PATH; ?>/user/dangnhap.php';
       }
-      if (typeof window.refreshFavoritesList === 'function') {
-        window.refreshFavoritesList();
+    })
+    .catch(function() {
+      alert('Có lỗi xảy ra, vui lòng thử lại!');
+    });
+  };
+}
+
+// === RATING FUNCTIONALITY ===
+const productId = <?php echo $id; ?>;
+const sellerId = <?php echo (int)$p['seller_id']; ?>;
+
+// Load ratings
+function loadRatings() {
+  fetch(basePath + '/api/get_ratings.php?product_id=' + productId)
+    .then(r => r.json())
+    .then(data => {
+      if (data.success) {
+        // Update summary
+        document.getElementById('ratingAverage').innerHTML = 
+          '<span class="rating-number">' + data.stats.average + '</span><span class="rating-star">★</span>';
+        document.getElementById('ratingTotal').textContent = data.stats.total;
+        
+        // Update bars
+        for (let i = 1; i <= 5; i++) {
+          const count = data.stats.breakdown[i] || 0;
+          const percent = data.stats.total > 0 ? (count / data.stats.total * 100) : 0;
+          document.getElementById('bar' + i).style.width = percent + '%';
+          document.getElementById('count' + i).textContent = count;
+        }
+        
+        // Update current user rating
+        if (data.user_rating && document.getElementById('starRatingInput')) {
+          document.getElementById('ratingValue').value = data.user_rating.rating;
+          document.getElementById('ratingComment').value = data.user_rating.comment || '';
+          updateStarDisplay(data.user_rating.rating);
+        }
+        
+        // Render ratings list
+        renderRatingsList(data.ratings);
       }
-    } else if (data && data.require_login) {
-      alert('Bạn cần đăng nhập để lưu tin!');
-      window.location.href = '<?php echo $BASE_PATH; ?>/user/dangnhap.php';
-    }
-  })
-  .catch(function() {
-    alert('Có lỗi xảy ra, vui lòng thử lại!');
+    });
+}
+
+function renderRatingsList(ratings) {
+  const container = document.getElementById('ratingsList');
+  if (!ratings || ratings.length === 0) {
+    container.innerHTML = '<p class="text-muted">Chưa có đánh giá nào</p>';
+    return;
+  }
+  
+  let html = '';
+  ratings.forEach(r => {
+    const stars = '★'.repeat(r.rating) + '☆'.repeat(5 - r.rating);
+    const initial = r.rater_name.charAt(0).toUpperCase();
+    const date = new Date(r.created_at).toLocaleDateString('vi-VN');
+    
+    html += `
+      <div class="rating-item">
+        <div class="rating-item-header">
+          <div class="rating-item-avatar">${initial}</div>
+          <span class="rating-item-name">${escapeHtml(r.rater_name)}</span>
+          <span class="rating-item-stars">${stars}</span>
+          <span class="rating-item-date">${date}</span>
+        </div>
+        ${r.comment ? '<div class="rating-item-comment">' + escapeHtml(r.comment) + '</div>' : ''}
+      </div>
+    `;
   });
-};
+  container.innerHTML = html;
+}
+
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+function updateStarDisplay(value) {
+  document.querySelectorAll('#starRatingInput .star-input').forEach((star, index) => {
+    star.textContent = index < value ? '★' : '☆';
+    star.classList.toggle('active', index < value);
+  });
+}
+
+// Star rating input
+if (document.getElementById('starRatingInput')) {
+  document.querySelectorAll('#starRatingInput .star-input').forEach(star => {
+    star.addEventListener('click', function() {
+      const value = parseInt(this.dataset.value);
+      document.getElementById('ratingValue').value = value;
+      updateStarDisplay(value);
+    });
+    
+    star.addEventListener('mouseenter', function() {
+      const value = parseInt(this.dataset.value);
+      document.querySelectorAll('#starRatingInput .star-input').forEach((s, index) => {
+        s.textContent = index < value ? '★' : '☆';
+      });
+    });
+  });
+  
+  document.getElementById('starRatingInput').addEventListener('mouseleave', function() {
+    const value = parseInt(document.getElementById('ratingValue').value) || 0;
+    updateStarDisplay(value);
+  });
+}
+
+// Submit rating
+if (document.getElementById('submitRating')) {
+  document.getElementById('submitRating').onclick = function() {
+    const rating = parseInt(document.getElementById('ratingValue').value);
+    const comment = document.getElementById('ratingComment').value.trim();
+    
+    if (rating < 1 || rating > 5) {
+      alert('Vui lòng chọn số sao đánh giá');
+      return;
+    }
+    
+    const formData = new FormData();
+    formData.append('product_id', productId);
+    formData.append('rating', rating);
+    formData.append('comment', comment);
+    
+    fetch(basePath + '/api/submit_rating.php', {
+      method: 'POST',
+      body: formData,
+      credentials: 'same-origin'
+    })
+    .then(r => r.json())
+    .then(data => {
+      if (data.success) {
+        alert(data.message);
+        loadRatings();
+      } else {
+        alert(data.message || 'Có lỗi xảy ra');
+      }
+    })
+    .catch(() => alert('Có lỗi xảy ra, vui lòng thử lại'));
+  };
+}
+
+// Load ratings on page load
+loadRatings();
+
+// === REPORT FUNCTIONALITY ===
+// Toggle other reason textarea
+document.querySelectorAll('input[name="reportReason"]').forEach(radio => {
+  radio.addEventListener('change', function() {
+    const otherWrapper = document.getElementById('otherReasonWrapper');
+    otherWrapper.style.display = this.value === 'other' ? 'block' : 'none';
+  });
+});
+
+// Submit report
+if (document.getElementById('submitReport')) {
+  document.getElementById('submitReport').onclick = function() {
+    const selected = document.querySelector('input[name="reportReason"]:checked');
+    if (!selected) {
+      alert('Vui lòng chọn lý do báo cáo');
+      return;
+    }
+    
+    let reason = selected.value;
+    if (reason === 'other') {
+      reason = document.getElementById('otherReason').value.trim();
+      if (reason.length < 10) {
+        alert('Vui lòng mô tả chi tiết lý do (tối thiểu 10 ký tự)');
+        return;
+      }
+    }
+    
+    const formData = new FormData();
+    formData.append('product_id', productId);
+    formData.append('reason', reason);
+    
+    fetch(basePath + '/api/submit_report.php', {
+      method: 'POST',
+      body: formData,
+      credentials: 'same-origin'
+    })
+    .then(r => r.json())
+    .then(data => {
+      if (data.success) {
+        alert(data.message);
+        // Close modal
+        const modal = bootstrap.Modal.getInstance(document.getElementById('reportModal'));
+        modal.hide();
+        // Reset form
+        document.querySelectorAll('input[name="reportReason"]').forEach(r => r.checked = false);
+        document.getElementById('otherReason').value = '';
+        document.getElementById('otherReasonWrapper').style.display = 'none';
+      } else {
+        alert(data.message || 'Có lỗi xảy ra');
+      }
+    })
+    .catch(() => alert('Có lỗi xảy ra, vui lòng thử lại'));
+  };
+}
 </script>
 
 <?php require_once __DIR__ . '/includes/footer.php'; ?>

@@ -291,7 +291,7 @@ $stmt2->close();
                     <h5 class="sidebar-title"><i class="fa-solid fa-user-gear me-2"></i>Menu</h5>
                     <ul class="sidebar-menu">
                         <li><a href="profile.php" class="active"><i class="fa-solid fa-user"></i> Hồ sơ cá nhân</a></li>
-                        <li><a href="user_dashboard.php"><i class="fa-solid fa-gauge"></i> Dashboard</a></li>
+                        <li><a href="user_dashboard.php"><i class="fa-solid fa-gauge"></i> Tổng quan</a></li>
                         <li><a href="user_dangtin.php"><i class="fa-solid fa-plus"></i> Đăng tin mới</a></li>
                         <li><a href="user_quanlytin.php"><i class="fa-solid fa-list"></i> Quản lý tin</a></li>
                         <li><a href="doimk.php"><i class="fa-solid fa-key"></i> Đổi mật khẩu</a></li>
@@ -388,4 +388,3 @@ $stmt2->close();
     </div>
 </div>
 
-<?php include_once dirname(__DIR__) . '/includes/footer.php'; ?>
