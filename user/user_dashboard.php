@@ -180,6 +180,67 @@ $approved = $conn->query("SELECT COUNT(*) as c FROM products WHERE seller_id = $
         border-radius: 10px;
         padding: 15px 20px;
     }
+
+    @media (max-width: 576px) {
+      .table-responsive {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        max-width: 100%;
+      }
+      table {
+        min-width: 600px;
+        font-size: 13px;
+      }
+      th, td {
+        padding: 6px 4px !important;
+        vertical-align: middle !important;
+      }
+      .btn, .btn-sm {
+        font-size: 12px !important;
+        padding: 4px 8px !important;
+      }
+      .table thead th {
+        white-space: nowrap;
+      }
+      .card-custom {
+        overflow-x: unset !important;
+        max-width: 100vw;
+      }
+    }
+
+    .menu-fixed, .sidebar-fixed, .sidebar.menu-fixed {
+      position: sticky;
+      top: 24px;
+      z-index: 10;
+    }
+    @media (max-width: 991.98px) {
+      .menu-fixed, .sidebar-fixed, .sidebar.menu-fixed {
+        position: static;
+        top: unset;
+      }
+    }
+
+    @media (min-width: 992px) {
+      .profile-sidebar {
+        position: fixed;
+        top: 90px;
+        left: 0;
+        height: calc(100vh - 90px);
+        overflow-y: auto;
+        z-index: 10;
+        width: 320px;
+      }
+      .profile-page .col-lg-3 {
+        width: 320px;
+        flex: 0 0 320px;
+        max-width: 320px;
+      }
+      .profile-page .col-lg-9 {
+        margin-left: 320px;
+        width: calc(100% - 320px);
+        max-width: calc(100% - 320px);
+      }
+    }
 </style>
 
 <div class="profile-page">
@@ -235,6 +296,7 @@ $approved = $conn->query("SELECT COUNT(*) as c FROM products WHERE seller_id = $
         <h4 class="mb-3"><i class="fa-solid fa-newspaper me-2"></i> Tin Đăng Gần Đây</h4>
         <p class="text-muted">Xem nhanh các tin bạn vừa đăng. Bạn có thể chỉnh sửa hoặc xóa tại đây.</p>
         
+        <div class="table-responsive">
         <table class="table align-middle dashboard-table">
             <thead class="table-light">
                 <tr>
@@ -282,10 +344,10 @@ $approved = $conn->query("SELECT COUNT(*) as c FROM products WHERE seller_id = $
                                     <i class='fa-solid fa-pen'></i> Sửa
                                 </a>
 
-                                <a href='xuly_xoa_tin.php?id={$row['id']}' 
+                                <a href='javascript:void(0)' 
                                 class='btn btn-sm btn-outline-danger'
                                 style='font-weight: 700; font-size: 12px;'
-                                onclick='return confirm(\"Bạn có chắc chắn muốn xóa tin này không?\")'>
+                                onclick='confirmDelete(\"Bạn có chắc chắn muốn xóa tin này không?\", \"xuly_xoa_tin.php?id={$row['id']}\")' >
                                 <i class='fa-solid fa-trash'></i> Xóa
                                 </a>
                             </td>";
@@ -298,6 +360,7 @@ $approved = $conn->query("SELECT COUNT(*) as c FROM products WHERE seller_id = $
                 ?>
             </tbody>
         </table>
+        </div>
     </div>
             </div>
         </div>

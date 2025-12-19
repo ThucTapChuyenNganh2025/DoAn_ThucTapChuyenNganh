@@ -10,13 +10,13 @@ require_once __DIR__ . '/../config/connect.php';
 
 // Kiểm tra đăng nhập
 if (!isset($_SESSION['user_id'])) {
-    echo json_encode(['status' => 'error', 'message' => 'Bạn cần đăng nhập để báo cáo', 'require_login' => true]);
+    echo json_encode(['success' => false, 'message' => 'Bạn cần đăng nhập để báo cáo', 'require_login' => true]);
     exit;
 }
 
 // Chỉ chấp nhận POST
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    echo json_encode(['status' => 'error', 'message' => 'Method not allowed']);
+    echo json_encode(['success' => false, 'message' => 'Method not allowed']);
     exit;
 }
 
@@ -26,12 +26,12 @@ $reason = isset($_POST['reason']) ? trim($_POST['reason']) : '';
 
 // Validate
 if ($product_id <= 0) {
-    echo json_encode(['status' => 'error', 'message' => 'Sản phẩm không hợp lệ']);
+    echo json_encode(['success' => false, 'message' => 'Sản phẩm không hợp lệ']);
     exit;
 }
 
 if (empty($reason) || mb_strlen($reason, 'UTF-8') < 10) {
-    echo json_encode(['status' => 'error', 'message' => 'Vui lòng nhập lý do báo cáo (ít nhất 10 ký tự)']);
+    echo json_encode(['success' => false, 'message' => 'Vui lòng nhập lý do báo cáo (ít nhất 10 ký tự)']);
     exit;
 }
 
@@ -43,7 +43,7 @@ $prod_stmt->execute();
 $prod_res = $prod_stmt->get_result();
 
 if ($prod_res->num_rows === 0) {
-    echo json_encode(['status' => 'error', 'message' => 'Sản phẩm không tồn tại']);
+    echo json_encode(['success' => false, 'message' => 'Sản phẩm không tồn tại']);
     exit;
 }
 
@@ -52,7 +52,7 @@ $prod_stmt->close();
 
 // Không cho phép tự báo cáo sản phẩm của mình
 if ($user_id === (int)$product['seller_id']) {
-    echo json_encode(['status' => 'error', 'message' => 'Bạn không thể báo cáo sản phẩm của mình']);
+    echo json_encode(['success' => false, 'message' => 'Bạn không thể báo cáo sản phẩm của mình']);
     exit;
 }
 
@@ -64,7 +64,7 @@ $check_stmt->execute();
 $check_res = $check_stmt->get_result();
 
 if ($check_res->num_rows > 0) {
-    echo json_encode(['status' => 'error', 'message' => 'Bạn đã báo cáo sản phẩm này rồi']);
+    echo json_encode(['success' => false, 'message' => 'Bạn đã báo cáo sản phẩm này rồi']);
     $check_stmt->close();
     exit;
 }
@@ -77,12 +77,12 @@ $insert_stmt->bind_param('iis', $product_id, $user_id, $reason);
 
 if ($insert_stmt->execute()) {
     echo json_encode([
-        'status' => 'success',
+        'success' => true,
         'message' => 'Cảm ơn bạn đã báo cáo. Chúng tôi sẽ xem xét sớm nhất!',
         'report_id' => $insert_stmt->insert_id
     ]);
 } else {
-    echo json_encode(['status' => 'error', 'message' => 'Lỗi gửi báo cáo']);
+    echo json_encode(['success' => false, 'message' => 'Lỗi gửi báo cáo']);
 }
 
 $insert_stmt->close();

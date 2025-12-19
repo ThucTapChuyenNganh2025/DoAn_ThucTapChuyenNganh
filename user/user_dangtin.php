@@ -51,7 +51,12 @@ if(isset($_POST['btn_dangtin'])) {
             }
         }
 
-        echo "<script>alert('Đăng tin thành công!'); window.location.href='user_dashboard.php';</script>";
+        echo '<script src="../js/toast.js"></script>
+              <script>
+                document.addEventListener("DOMContentLoaded", function() {
+                    toastAndRedirect("Đăng tin thành công!", "success", "user_dashboard.php", 1500);
+                });
+              </script>';
     } else {
         echo "Lỗi khi thêm sản phẩm: " . $conn->error;
     }
@@ -222,6 +227,28 @@ if(isset($_POST['btn_dangtin'])) {
         font-size: 40px;
         color: #ddd;
         margin-bottom: 10px;
+    }
+
+    @media (min-width: 992px) {
+      .profile-sidebar {
+        position: fixed;
+        top: 90px;
+        left: 0;
+        height: calc(100vh - 90px);
+        overflow-y: auto;
+        z-index: 10;
+        width: 320px;
+      }
+      .profile-page .col-lg-3 {
+        width: 320px;
+        flex: 0 0 320px;
+        max-width: 320px;
+      }
+      .profile-page .col-lg-9 {
+        margin-left: 320px;
+        width: calc(100% - 320px);
+        max-width: calc(100% - 320px);
+      }
     }
 </style>
 

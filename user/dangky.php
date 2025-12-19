@@ -52,9 +52,11 @@ if (isset($_POST['create'])) {
 
                 try {
                     if ($stmt->execute()) {
-                        echo '<script>
-                                alert("Đăng ký thành công! Bạn có thể đăng nhập ngay.");
-                                window.location.href = "dangnhap.php";
+                        echo '<script src="../js/toast.js"></script>
+                              <script>
+                                document.addEventListener("DOMContentLoaded", function() {
+                                    toastAndRedirect("Đăng ký thành công! Bạn có thể đăng nhập ngay.", "success", "dangnhap.php", 2000);
+                                });
                               </script>';
                         exit();
                     } else {

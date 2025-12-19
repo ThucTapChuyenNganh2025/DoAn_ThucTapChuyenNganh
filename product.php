@@ -676,12 +676,14 @@ if (btnFavorite) {
           window.refreshFavoritesList();
         }
       } else if (data && data.require_login) {
-        alert('Bạn cần đăng nhập để lưu tin!');
-        window.location.href = '<?php echo $BASE_PATH; ?>/user/dangnhap.php';
+        toastWarning('Bạn cần đăng nhập để lưu tin!');
+        setTimeout(() => {
+          window.location.href = '<?php echo $BASE_PATH; ?>/user/dangnhap.php';
+        }, 1500);
       }
     })
     .catch(function() {
-      alert('Có lỗi xảy ra, vui lòng thử lại!');
+      toastError('Có lỗi xảy ra, vui lòng thử lại!');
     });
   };
 }
@@ -793,7 +795,7 @@ if (document.getElementById('submitRating')) {
     const comment = document.getElementById('ratingComment').value.trim();
     
     if (rating < 1 || rating > 5) {
-      alert('Vui lòng chọn số sao đánh giá');
+      toastWarning('Vui lòng chọn số sao đánh giá');
       return;
     }
     
@@ -810,13 +812,13 @@ if (document.getElementById('submitRating')) {
     .then(r => r.json())
     .then(data => {
       if (data.success) {
-        alert(data.message);
+        toastSuccess(data.message);
         loadRatings();
       } else {
-        alert(data.message || 'Có lỗi xảy ra');
+        toastError(data.message || 'Có lỗi xảy ra');
       }
     })
-    .catch(() => alert('Có lỗi xảy ra, vui lòng thử lại'));
+    .catch(() => toastError('Có lỗi xảy ra, vui lòng thử lại'));
   };
 }
 
@@ -837,7 +839,7 @@ if (document.getElementById('submitReport')) {
   document.getElementById('submitReport').onclick = function() {
     const selected = document.querySelector('input[name="reportReason"]:checked');
     if (!selected) {
-      alert('Vui lòng chọn lý do báo cáo');
+      toastWarning('Vui lòng chọn lý do báo cáo');
       return;
     }
     
@@ -845,7 +847,7 @@ if (document.getElementById('submitReport')) {
     if (reason === 'other') {
       reason = document.getElementById('otherReason').value.trim();
       if (reason.length < 10) {
-        alert('Vui lòng mô tả chi tiết lý do (tối thiểu 10 ký tự)');
+        toastWarning('Vui lòng mô tả chi tiết lý do (tối thiểu 10 ký tự)');
         return;
       }
     }
@@ -862,7 +864,7 @@ if (document.getElementById('submitReport')) {
     .then(r => r.json())
     .then(data => {
       if (data.success) {
-        alert(data.message);
+        toastSuccess(data.message);
         // Close modal
         const modal = bootstrap.Modal.getInstance(document.getElementById('reportModal'));
         modal.hide();
@@ -871,10 +873,10 @@ if (document.getElementById('submitReport')) {
         document.getElementById('otherReason').value = '';
         document.getElementById('otherReasonWrapper').style.display = 'none';
       } else {
-        alert(data.message || 'Có lỗi xảy ra');
+        toastError(data.message || 'Có lỗi xảy ra');
       }
     })
-    .catch(() => alert('Có lỗi xảy ra, vui lòng thử lại'));
+    .catch(() => toastError('Có lỗi xảy ra, vui lòng thử lại'));
   };
 }
 </script>

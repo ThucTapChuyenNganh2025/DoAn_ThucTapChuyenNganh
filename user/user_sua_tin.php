@@ -21,7 +21,15 @@ $sql_get = "SELECT * FROM products WHERE id = $id AND seller_id = $my_id";
 $result = $conn->query($sql_get);
 
 if ($result->num_rows == 0) {
-    echo "<script>alert('Tin không tồn tại hoặc không thuộc quyền của bạn!'); window.location.href='user_dashboard.php';</script>";
+    echo '<!DOCTYPE html><html><head>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+        <script src="../js/toast.js"></script>
+    </head><body>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            toastAndRedirect("Tin không tồn tại hoặc không thuộc quyền của bạn!", "error", "user_dashboard.php", 2000);
+        });
+    </script></body></html>';
     exit;
 }
 $row = $result->fetch_assoc();
@@ -80,10 +88,12 @@ if (isset($_POST['btn_update'])) {
     $sql_update = "UPDATE products SET title='$title', price='$price', description='$desc', category_id='$cate_id', location_id=$location_id WHERE id=$id AND seller_id=$my_id";
 
     if ($conn->query($sql_update) === TRUE) {
-        echo "<script>
-                alert('Cập nhật thành công! Tin sẽ chờ duyệt lại.');
-                window.location.href='user_dashboard.php';
-              </script>";
+        echo '<script src="../js/toast.js"></script>
+              <script>
+                document.addEventListener("DOMContentLoaded", function() {
+                    toastAndRedirect("Cập nhật thành công!", "success", "user_dashboard.php", 1500);
+                });
+              </script>';
     } else {
         echo "Lỗi SQL: " . $conn->error;
     }

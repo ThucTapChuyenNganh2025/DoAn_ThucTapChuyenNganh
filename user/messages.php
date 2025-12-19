@@ -49,6 +49,7 @@ if ($direct_product_id > 0 && $direct_user_id > 0 && $direct_user_id != $user_id
   <title>Tin nhắn - Chợ Điện Tử</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <script src="../js/toast.js"></script>
   <style>
     * { box-sizing: border-box; }
     
@@ -417,6 +418,60 @@ if ($direct_product_id > 0 && $direct_user_id > 0 && $direct_user_id != $user_id
       padding: 0 4px;
     }
     
+    /* Improved mobile message layout */
+    @media (max-width: 576px) {
+      .chat-messages {
+        padding: 12px 4px 12px 4px;
+      }
+      .msg-row {
+        margin-bottom: 14px;
+        align-items: flex-end;
+      }
+      .msg-row.mine {
+        justify-content: flex-end;
+      }
+      .msg-row > div {
+        max-width: 95vw;
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+      }
+      .msg-row:not(.mine) > div {
+        align-items: flex-start;
+      }
+      .msg-bubble {
+        max-width: 80vw;
+        min-width: 36px;
+        padding: 10px 14px;
+        font-size: 15px;
+        line-height: 1.6;
+        border-radius: 14px;
+        margin-bottom: 2px;
+        word-break: break-word;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+      }
+      .msg-row.mine .msg-bubble {
+        background: linear-gradient(135deg, #0084ff 0%, #0066cc 100%);
+        color: #fff;
+        border-bottom-right-radius: 8px;
+        align-self: flex-end;
+      }
+      .msg-row:not(.mine) .msg-bubble {
+        background: #f8f9fa;
+        color: #222;
+        border-bottom-left-radius: 8px;
+        align-self: flex-start;
+      }
+      .msg-time {
+        font-size: 12px;
+        color: #888;
+        margin-top: 2px;
+        margin-bottom: 2px;
+        align-self: flex-end;
+      }
+    }
+    
     /* Chat Input */
     .chat-input-area {
       padding: 12px 20px;
@@ -516,41 +571,77 @@ if ($direct_product_id > 0 && $direct_user_id > 0 && $direct_user_id != $user_id
     }
     
     /* Responsive */
-    @media (max-width: 768px) {
+    @media (max-width: 992px) {
+      .msg-topbar {
+        height: 56px;
+        padding: 0 16px;
+      }
+      .msg-topbar .title {
+        font-size: 16px;
+      }
+      .msg-container {
+        margin-top: 56px;
+      }
       .msg-sidebar {
         width: 100%;
         position: absolute;
         left: 0;
-        top: 60px;
+        top: 56px;
         bottom: 0;
         z-index: 50;
         transition: transform 0.3s;
       }
-      
       .msg-sidebar.hidden {
         transform: translateX(-100%);
       }
-      
       .msg-chat {
         position: absolute;
         left: 0;
         right: 0;
-        top: 60px;
+        top: 56px;
         bottom: 0;
       }
-      
-      .mobile-back-btn {
-        display: flex !important;
-      }
-      
       .msg-bubble {
-        max-width: 85%;
+        max-width: 80%;
+        font-size: 14px;
+        padding: 8px 12px;
+        text-align: left;
+      }
+      .chat-input {
+        font-size: 14px;
+        padding: 10px 16px;
+      }
+      .chat-send-btn {
+        width: 40px;
+        height: 40px;
+        font-size: 16px;
       }
     }
-    
-    @media (min-width: 769px) {
-      .mobile-back-btn {
-        display: none !important;
+
+    @media (max-width: 576px) {
+      .msg-topbar {
+        height: 50px;
+        padding: 0 12px;
+      }
+      .msg-topbar .title {
+        font-size: 14px;
+      }
+      .msg-container {
+        margin-top: 50px;
+      }
+      .msg-bubble {
+        max-width: 75%;
+        font-size: 13px;
+        padding: 6px 10px;
+      }
+      .chat-input {
+        font-size: 13px;
+        padding: 8px 12px;
+      }
+      .chat-send-btn {
+        width: 36px;
+        height: 36px;
+        font-size: 14px;
       }
     }
     
@@ -915,12 +1006,12 @@ function sendMessage() {
       if (data.data.id > lastMessageId) lastMessageId = data.data.id;
       loadConversations();
     } else {
-      alert(data.message || 'Không thể gửi tin nhắn');
+      toastError(data.message || 'Không thể gửi tin nhắn');
     }
   })
   .catch(err => {
     btn.disabled = false;
-    alert('Lỗi kết nối!');
+    toastError('Lỗi kết nối!');
   });
 }
 

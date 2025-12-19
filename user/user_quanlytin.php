@@ -176,6 +176,39 @@ if($u_query && $u_query->num_rows > 0) {
         border-radius: 10px;
         padding: 15px 20px;
     }
+
+    .menu-fixed, .sidebar-fixed, .sidebar.menu-fixed {
+      position: sticky;
+      top: 24px;
+      z-index: 10;
+    }
+    @media (max-width: 991.98px) {
+      .menu-fixed, .sidebar-fixed, .sidebar.menu-fixed {
+        position: static;
+        top: unset;
+      }
+    }
+    @media (min-width: 992px) {
+      .profile-sidebar {
+        position: fixed;
+        top: 90px;
+        left: 0;
+        height: calc(100vh - 90px);
+        overflow-y: auto;
+        z-index: 10;
+        width: 320px;
+      }
+      .profile-page .col-lg-3 {
+        width: 320px;
+        flex: 0 0 320px;
+        max-width: 320px;
+      }
+      .profile-page .col-lg-9 {
+        margin-left: 320px;
+        width: calc(100% - 320px);
+        max-width: calc(100% - 320px);
+      }
+    }
 </style>
 
 <div class="profile-page">
@@ -261,16 +294,16 @@ if($u_query && $u_query->num_rows > 0) {
                                     echo "<td><a href='../index.php?id={$row['id']}' target='_blank' class='product-title'>$title</a></td>";
                                     echo "<td class='product-price'>$price đ</td>";
                                     echo "<td>$status_badge</td>";
-                                    echo "<td><span class='badge bg-info' style='font-size: 12px; font-weight: 700; padding: 6px 10px; color: #fff;'>$fav_count <i class='fa-solid fa-heart'></i></span></td>";
+                                    echo "<td><span style='display: inline-flex; align-items: center; gap: 5px; background: linear-gradient(135deg, #ff6b6b, #ee5a5a); color: #fff; font-size: 13px; font-weight: 700; padding: 8px 14px; border-radius: 20px; box-shadow: 0 2px 8px rgba(238, 90, 90, 0.3);'><i class='fa-solid fa-heart'></i> $fav_count</span></td>";
                                     echo "<td style='font-weight: 500;'>$date</td>";
                                     echo "<td>
                                             <a href='user_sua_tin.php?id={$row['id']}' class='btn btn-sm btn-outline-primary' style='font-weight: 600; font-size: 12px;'>
                                                 <i class='fa-solid fa-pen'></i> Sửa
                                             </a>
-                                            <a href='xuly_xoa_tin.php?id={$row['id']}' 
+                                            <a href='javascript:void(0)' 
                                             class='btn btn-sm btn-outline-danger'
                                             style='font-weight: 600; font-size: 12px;'
-                                            onclick='return confirm(\"Bạn có chắc chắn muốn xóa tin này không?\")'>
+                                            onclick='confirmDelete(\"Bạn có chắc chắn muốn xóa tin này không?\", \"xuly_xoa_tin.php?id={$row['id']}\")' >
                                             <i class='fa-solid fa-trash'></i> Xóa
                                             </a>
                                         </td>";

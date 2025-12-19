@@ -255,6 +255,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         margin-bottom: 5px;
         font-size: 14px;
     }
+
+    @media (min-width: 992px) {
+      .profile-sidebar {
+        position: fixed;
+        top: 90px;
+        left: 0;
+        height: calc(100vh - 90px);
+        overflow-y: auto;
+        z-index: 10;
+        width: 320px;
+      }
+      .profile-page .col-lg-3 {
+        width: 320px;
+        flex: 0 0 320px;
+        max-width: 320px;
+      }
+      .profile-page .col-lg-9 {
+        margin-left: 320px;
+        width: calc(100% - 320px);
+        max-width: calc(100% - 320px);
+      }
+    }
 </style>
 
 <div class="profile-page">

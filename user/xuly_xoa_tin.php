@@ -23,7 +23,15 @@ $check_sql = "SELECT id FROM products WHERE id = $product_id AND seller_id = $se
 $check = $conn->query($check_sql);
 
 if (!$check || $check->num_rows == 0) {
-    echo "<script>alert('Bạn không có quyền xoá sản phẩm này!'); window.location.href='user_quanlytin.php';</script>";
+    echo '<!DOCTYPE html><html><head>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+        <script src="../js/toast.js"></script>
+    </head><body>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            toastAndRedirect("Bạn không có quyền xoá sản phẩm này!", "error", "user_quanlytin.php", 2000);
+        });
+    </script></body></html>';
     exit;
 }
 
@@ -48,6 +56,14 @@ $conn->query("DELETE FROM product_images WHERE product_id = $product_id");
 $conn->query("DELETE FROM products WHERE id = $product_id");
 
 // 6) Điều hướng về trang quản lý tin
-echo "<script>alert('Xoá tin thành công!'); window.location.href='user_quanlytin.php';</script>";
+echo '<!DOCTYPE html><html><head>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="../js/toast.js"></script>
+</head><body>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        toastAndRedirect("Xoá tin thành công!", "success", "user_quanlytin.php", 1500);
+    });
+</script></body></html>';
 exit;
 ?>

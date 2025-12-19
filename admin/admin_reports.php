@@ -125,6 +125,7 @@ $reports_stmt->close();
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+    <script src="../js/toast.js"></script>
 
     <style>
         body { background-color: #f0f2f5; font-family: 'Nunito', sans-serif; overflow-x: hidden; }
@@ -387,19 +388,19 @@ $reports_stmt->close();
                         </form>
                         
                         <?php if ($report['product_status'] !== 'hidden'): ?>
-                        <form method="POST" class="d-inline">
+                        <form method="POST" class="d-inline" id="hide-form-<?php echo $report['id']; ?>">
                             <input type="hidden" name="report_id" value="<?php echo $report['id']; ?>">
                             <input type="hidden" name="action" value="delete_product">
-                            <button type="submit" class="btn btn-warning btn-sm" onclick="return confirm('Ẩn sản phẩm này khỏi trang web?')">
+                            <button type="button" class="btn btn-warning btn-sm" onclick="showConfirm('Ẩn sản phẩm này khỏi trang web?', function() { document.getElementById('hide-form-<?php echo $report['id']; ?>').submit(); }, null, { title: 'Xác nhận ẩn', confirmText: 'Ẩn sản phẩm', type: 'warning' })">
                                 <i class="fa-solid fa-eye-slash"></i> Ẩn
                             </button>
                         </form>
                         <?php endif; ?>
                         
-                        <form method="POST" class="d-inline">
+                        <form method="POST" class="d-inline" id="delete-form-<?php echo $report['id']; ?>">
                             <input type="hidden" name="report_id" value="<?php echo $report['id']; ?>">
                             <input type="hidden" name="action" value="delete_permanently">
-                            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('⚠️ XÓA VĨNH VIỄN sản phẩm này?\n\nHành động này không thể hoàn tác!')">
+                            <button type="button" class="btn btn-danger btn-sm" onclick="showConfirm('⚠️ XÓA VĨNH VIỄN sản phẩm này? Hành động này không thể hoàn tác!', function() { document.getElementById('delete-form-<?php echo $report['id']; ?>').submit(); }, null, { title: 'Xác nhận xóa', confirmText: 'Xóa vĩnh viễn', type: 'danger' })">
                                 <i class="fa-solid fa-trash"></i> Xóa
                             </button>
                         </form>

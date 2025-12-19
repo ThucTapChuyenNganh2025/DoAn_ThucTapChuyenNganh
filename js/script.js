@@ -913,35 +913,41 @@ $(document).on("click", ".remove-favorite", function (e) {
 // Clear all favorites
 $(document).on("click", "#clear-favorites", function (e) {
   e.preventDefault();
-  if (!confirm("Xóa tất cả sản phẩm yêu thích chứ?")) return;
-
-  $.ajax({
-    url: "favorites/clear_favorites.php",
-    method: "POST",
-    dataType: "json",
-    success: function (data) {
-      if (data.status === "success") {
-        updateFavoritesBadges();
-        // remove favorited class from page buttons
-        $(".btn-wishlist").removeClass("favorited");
-        renderFavoritesIntoOffcanvas();
-      } else {
-        console.debug("Lỗi: " + (data.message || "Không xác định"));
-      }
-    },
-    error: function () {
-      // Fallback to localStorage
-      try {
-        saveFavorites([]);
-        updateFavoritesBadges();
-        $(".btn-wishlist").removeClass("favorited");
-        renderFavoritesIntoOffcanvas();
-        console.debug("Đã xóa tất cả sản phẩm yêu thích (cục bộ).");
-      } catch (err) {
-        console.error(err);
-        console.debug("Không thể xóa sản phẩm yêu thích cục bộ.");
-      }
-    },
+  showConfirm("Xóa tất cả sản phẩm yêu thích?", function() {
+    $.ajax({
+      url: "favorites/clear_favorites.php",
+      method: "POST",
+      dataType: "json",
+      success: function (data) {
+        if (data.status === "success") {
+          toastSuccess('Đã xóa tất cả sản phẩm yêu thích!');
+          updateFavoritesBadges();
+          // remove favorited class from page buttons
+          $(".btn-wishlist").removeClass("favorited");
+          renderFavoritesIntoOffcanvas();
+        } else {
+          console.debug("Lỗi: " + (data.message || "Không xác định"));
+        }
+      },
+      error: function () {
+        // Fallback to localStorage
+        try {
+          saveFavorites([]);
+          updateFavoritesBadges();
+          $(".btn-wishlist").removeClass("favorited");
+          renderFavoritesIntoOffcanvas();
+          console.debug("Đã xóa tất cả sản phẩm yêu thích (cục bộ).");
+        } catch (err) {
+          console.error(err);
+          console.debug("Không thể xóa sản phẩm yêu thích cục bộ.");
+        }
+      },
+    });
+  }, null, {
+    title: 'Xác nhận xóa',
+    confirmText: 'Xóa tất cả',
+    cancelText: 'Hủy',
+    type: 'danger'
   });
 });
 

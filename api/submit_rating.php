@@ -10,13 +10,13 @@ require_once __DIR__ . '/../config/connect.php';
 
 // Kiểm tra đăng nhập
 if (!isset($_SESSION['user_id'])) {
-    echo json_encode(['status' => 'error', 'message' => 'Bạn cần đăng nhập để đánh giá', 'require_login' => true]);
+    echo json_encode(['success' => false, 'message' => 'Bạn cần đăng nhập để đánh giá', 'require_login' => true]);
     exit;
 }
 
 // Chỉ chấp nhận POST
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    echo json_encode(['status' => 'error', 'message' => 'Method not allowed']);
+    echo json_encode(['success' => false, 'message' => 'Method not allowed']);
     exit;
 }
 
@@ -27,12 +27,12 @@ $comment = isset($_POST['comment']) ? trim($_POST['comment']) : '';
 
 // Validate
 if ($product_id <= 0) {
-    echo json_encode(['status' => 'error', 'message' => 'Sản phẩm không hợp lệ']);
+    echo json_encode(['success' => false, 'message' => 'Sản phẩm không hợp lệ']);
     exit;
 }
 
 if ($rating < 1 || $rating > 5) {
-    echo json_encode(['status' => 'error', 'message' => 'Đánh giá phải từ 1-5 sao']);
+    echo json_encode(['success' => false, 'message' => 'Đánh giá phải từ 1-5 sao']);
     exit;
 }
 
@@ -44,7 +44,7 @@ $prod_stmt->execute();
 $prod_res = $prod_stmt->get_result();
 
 if ($prod_res->num_rows === 0) {
-    echo json_encode(['status' => 'error', 'message' => 'Sản phẩm không tồn tại']);
+    echo json_encode(['success' => false, 'message' => 'Sản phẩm không tồn tại']);
     exit;
 }
 
@@ -54,7 +54,7 @@ $prod_stmt->close();
 
 // Không cho phép tự đánh giá
 if ($user_id === $seller_id) {
-    echo json_encode(['status' => 'error', 'message' => 'Bạn không thể tự đánh giá sản phẩm của mình']);
+    echo json_encode(['success' => false, 'message' => 'Bạn không thể tự đánh giá sản phẩm của mình']);
     exit;
 }
 
@@ -74,12 +74,12 @@ if ($check_res->num_rows > 0) {
     
     if ($update_stmt->execute()) {
         echo json_encode([
-            'status' => 'success',
+            'success' => true,
             'message' => 'Đã cập nhật đánh giá',
             'action' => 'updated'
         ]);
     } else {
-        echo json_encode(['status' => 'error', 'message' => 'Lỗi cập nhật đánh giá']);
+        echo json_encode(['success' => false, 'message' => 'Lỗi cập nhật đánh giá']);
     }
     $update_stmt->close();
 } else {
@@ -90,13 +90,13 @@ if ($check_res->num_rows > 0) {
     
     if ($insert_stmt->execute()) {
         echo json_encode([
-            'status' => 'success',
+            'success' => true,
             'message' => 'Đã gửi đánh giá thành công',
             'action' => 'created',
             'rating_id' => $insert_stmt->insert_id
         ]);
     } else {
-        echo json_encode(['status' => 'error', 'message' => 'Lỗi gửi đánh giá']);
+        echo json_encode(['success' => false, 'message' => 'Lỗi gửi đánh giá']);
     }
     $insert_stmt->close();
 }

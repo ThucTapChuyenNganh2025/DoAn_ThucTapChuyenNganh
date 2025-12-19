@@ -280,6 +280,28 @@ $stmt2->close();
         background: #dc3545;
         color: #fff !important;
     }
+    
+    @media (min-width: 992px) {
+  .profile-sidebar {
+    position: fixed;
+    top: 90px;
+    left: 0;
+    height: calc(100vh - 90px);
+    overflow-y: auto;
+    z-index: 10;
+    width: 320px;
+  }
+  .profile-page .col-lg-3 {
+    width: 320px;
+    flex: 0 0 320px;
+    max-width: 320px;
+  }
+  .profile-page .col-lg-9 {
+    margin-left: 320px;
+    width: calc(100% - 320px);
+    max-width: calc(100% - 320px);
+  }
+}
 </style>
 
 <div class="profile-page">
@@ -378,7 +400,7 @@ $stmt2->close();
                                 <i class="fa-solid fa-key me-2"></i>Đổi mật khẩu
                             </a>
                             <a href="user_dashboard.php" class="btn-profile btn-dashboard">
-                                <i class="fa-solid fa-gauge me-2"></i>Dashboard
+                                <i class="fa-solid fa-gauge me-2"></i>Tổng quan
                             </a>
                         </div>
                     </div>
