@@ -1,23 +1,18 @@
-<!DOCTYPE html>
-<html lang="vi">
+<?php
+session_start();
+include '../config/connect.php';
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tạo tài khoản Users</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
+$error_msg = '';
+$success_msg = '';
 
-<body>
-    <div class="container mt-5">
-        <div class="row justify-content-center">
-            <div class="col-md-6">
-                <h2 class="mb-4 text-center text-danger fw-bold">TẠO TÀI KHOẢN USERS</h2>
+// --- PHẦN MỚI THÊM: Lấy danh sách Tỉnh/Thành từ Database ---
+// Truy vấn lấy id và tên tỉnh. 
+// Nếu bảng locations có cả huyện, bạn có thể thêm WHERE district IS NULL
+$sql_loc = "SELECT id, province FROM locations ORDER BY id ASC"; 
+$result_loc = $conn->query($sql_loc);
+// -----------------------------------------------------------
 
-                <?php
-include '../config/connect.php'; // file kết nối CSDL
-
-if (isset($_POST['create'])) {  
+if (isset($_POST['create'])) {   
     $name         = trim($_POST['name']);
     $email        = trim($_POST['email']);
     $phone        = trim($_POST['phone']);
@@ -26,64 +21,50 @@ if (isset($_POST['create'])) {
     $bio          = trim($_POST['bio']);
     $location_id  = $_POST['location_id'];
 
-    // Kiểm tra mật khẩu xác nhận
     if ($password !== $confirm_pass) {
-        echo '<div class="alert alert-danger text-center">Mật khẩu xác nhận không khớp!</div>';
+        $error_msg = 'Mật khẩu xác nhận không khớp!';
     } else {
-        // Kiểm tra email đã tồn tại chưa
         $check = $conn->prepare("SELECT id FROM users WHERE email = ?");
         $check->bind_param("s", $email);
         $check->execute();
         $result = $check->get_result();
 
         if ($result->num_rows > 0) {
-            echo '<div class="alert alert-danger text-center">Email này đã tồn tại!</div>';
+            $error_msg = 'Email này đã tồn tại!';
             $check->close();
         } else {
             $check->close();
             
-            // Kiểm tra số điện thoại đã tồn tại chưa
             $check_phone = $conn->prepare("SELECT id FROM users WHERE phone = ?");
             $check_phone->bind_param("s", $phone);
             $check_phone->execute();
             $phone_result = $check_phone->get_result();
             
             if ($phone_result->num_rows > 0) {
-                echo '<div class="alert alert-danger text-center">Số điện thoại này đã được sử dụng!</div>';
+                $error_msg = 'Số điện thoại này đã được sử dụng!';
                 $check_phone->close();
             } else {
                 $check_phone->close();
                 
-                // Hash mật khẩu
                 $password_hash = password_hash($password, PASSWORD_BCRYPT);
-
-                // Thêm user mới
-                $stmt = $conn->prepare("INSERT INTO users (name, email, phone, password, bio, location_id, is_verified, created_at) 
-                                        VALUES (?, ?, ?, ?, ?, ?, 0, NOW())");
+                $stmt = $conn->prepare("INSERT INTO users (name, email, phone, password, bio, location_id, is_verified, created_at) VALUES (?, ?, ?, ?, ?, ?, 0, NOW())");
                 $stmt->bind_param("sssssi", $name, $email, $phone, $password_hash, $bio, $location_id);
 
                 try {
                     if ($stmt->execute()) {
-                        // Chuyển hướng sang trang đăng nhập
                         echo '<script>
-                                alert("Đăng ký thành công! Email: ' . htmlspecialchars($email) . '");
+                                alert("Đăng ký thành công! Bạn có thể đăng nhập ngay.");
                                 window.location.href = "dangnhap.php";
                               </script>';
                         exit();
                     } else {
-                        echo '<div class="alert alert-danger text-center">Có lỗi xảy ra khi đăng ký!</div>';
+                        $error_msg = 'Có lỗi xảy ra khi đăng ký!';
                     }
                 } catch (mysqli_sql_exception $e) {
                     if (strpos($e->getMessage(), 'Duplicate entry') !== false) {
-                        if (strpos($e->getMessage(), 'phone') !== false) {
-                            echo '<div class="alert alert-danger text-center">Số điện thoại này đã được sử dụng!</div>';
-                        } elseif (strpos($e->getMessage(), 'email') !== false) {
-                            echo '<div class="alert alert-danger text-center">Email này đã tồn tại!</div>';
-                        } else {
-                            echo '<div class="alert alert-danger text-center">Thông tin đã tồn tại trong hệ thống!</div>';
-                        }
+                        $error_msg = 'Thông tin (Email hoặc SĐT) đã tồn tại!';
                     } else {
-                        echo '<div class="alert alert-danger text-center">Có lỗi xảy ra: ' . htmlspecialchars($e->getMessage()) . '</div>';
+                        $error_msg = 'Lỗi hệ thống: ' . htmlspecialchars($e->getMessage());
                     }
                 }
                 $stmt->close();
@@ -92,93 +73,312 @@ if (isset($_POST['create'])) {
     }
 }
 ?>
-                <form method="post" class="border p-4 rounded shadow">
-                    <div class="mb-3">
-                        <label class="form-label fw-bold text-dark">Họ và tên</label>
-                        <input type="text" class="form-control" name="name" required placeholder="Nhập tên đầy đủ">
-                    </div>
 
-                    <div class="mb-3">
-                        <label class="form-label fw-bold text-dark">Email</label>
-                        <input type="email" class="form-control" name="email" required placeholder="email@gmail.com">
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-bold text-dark">Số điện thoại</label>
-                        <input type="tel" class="form-control" name="phone" placeholder="Nhập số điện thoại"
-                            pattern="^[0-9]{10}$" required>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-bold text-dark">Mật khẩu</label>
-                        <input type="password" class="form-control" name="password" required minlength="6"
-                            placeholder="Nhập mật khẩu">
-                        <small class="text-muted">Tối thiểu 6 ký tự nên có chữ hoa, số và ký tự đặc biệt</small>
-                    </div>
+<!DOCTYPE html>
+<html lang="vi">
 
-                    <div class="mb-3">
-                        <label class="form-label fw-bold text-dark">Nhập lại mật khẩu</label>
-                        <input type="password" class="form-control" name="confirm_password" required
-                            placeholder="Nhập lại mật khẩu">
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-bold text-dark">Giới thiệu ngắn</label>
-                        <textarea class="form-control" name="bio" placeholder="Nhập giới thiệu về bạn"></textarea>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-bold text-dark">Địa chỉ</label>
-                        <select class="form-select" name="location_id">
-                            <option value="1">An Giang</option>
-                            <option value="2">Bắc Ninh</option>
-                            <option value="3">Cà Mau</option>
-                            <option value="4">Cao Bằng</option>
-                            <option value="5">Điện Biên</option>
-                            <option value="6">Đắk Lắk</option>
-                            <option value="7">Đồng Nai</option>
-                            <option value="8">Đồng Tháp</option>
-                            <option value="9">Gia Lai</option>
-                            <option value="10">Hà Tĩnh</option>
-                            <option value="11">Hưng Yên</option>
-                            <option value="12">Khánh Hòa</option>
-                            <option value="13">Lai Châu</option>
-                            <option value="14">Lạng Sơn</option>
-                            <option value="15">Lào Cai</option>
-                            <option value="16">Lâm Đồng</option>
-                            <option value="17">Nghệ An</option>
-                            <option value="18">Ninh Bình</option>
-                            <option value="19">Phú Thọ</option>
-                            <option value="20">Quảng Ngãi</option>
-                            <option value="21">Quảng Ninh</option>
-                            <option value="22">Quảng Trị</option>
-                            <option value="23">Sơn La</option>
-                            <option value="24">Tây Ninh</option>
-                            <option value="25">Thanh Hóa</option>
-                            <option value="26">Thái Nguyên</option>
-                            <option value="27">TP.Cần Thơ</option>
-                            <option value="28">TP.Đà Nẵng</option>
-                            <option value="29">TP.Hà Nội</option>
-                            <option value="30">TP.Hải Phòng</option>
-                            <option value="31">TP.Hồ Chí Minh</option>
-                            <option value="32">TP.Huế</option>
-                            <option value="33">Tuyên Quang</option>
-                            <option value="34">Vĩnh Long</option>
-                        </select>
-                    </div>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng ký - Chợ Điện Tử</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-color: #1a202c;
+            --accent-color: #f6c23e; 
+            --bg-color: #f4f6f9;
+            --text-color: #333;
+        }
 
-                    <!-- Submit -->
-                    <div class="text-center">
-                        <button type="submit" name="create" class="btn btn-danger px-5 fw-bold">TẠO TÀI KHOẢN
-                            NGAY</button>
-                    </div>
-                    <div class="text-center mt-3">
-                        <small>Đã có tài khoản? <a href="dangnhap.php" class="text-danger fw-bold">Đăng
-                                nhập</a></small>
-                    </div>
-                </form>
+        body {
+            background-color: var(--bg-color);
+            font-family: 'Roboto', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 40px 0;
+        }
 
+        .login-card {
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
+            padding: 40px 30px;
+            width: 100%;
+            max-width: 550px;
+            border-top: 5px solid var(--accent-color);
+        }
+
+        .brand-logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 25px;
+            text-decoration: none;
+        }
+
+        .logo-icon {
+            background-color: var(--accent-color);
+            color: var(--primary-color);
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            font-size: 20px;
+            margin-right: 10px;
+        }
+
+        .logo-text {
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--primary-color);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .login-card h4 {
+            color: #555;
+            font-weight: 600;
+            margin-bottom: 25px;
+            text-align: center;
+            font-size: 1.2rem;
+            text-transform: uppercase;
+        }
+
+        .form-control, .form-select {
+            border-radius: 6px;
+            padding: 10px 15px;
+            border: 1px solid #ced4da;
+            font-size: 0.95rem;
+            border-left: none;
+        }
+        
+        .password-field {
+            border-right: none;
+        }
+
+        .form-control:focus, .form-select:focus {
+            box-shadow: none;
+            border-color: var(--accent-color);
+        }
+
+        .input-group-text {
+            background-color: #fff;
+            border-right: none;
+            color: #888;
+            min-width: 45px;
+            justify-content: center;
+        }
+
+        .form-select { border-left: none; }
+        
+        .toggle-password {
+            cursor: pointer;
+            border-left: none;
+            border-top-right-radius: 6px !important;
+            border-bottom-right-radius: 6px !important;
+            border: 1px solid #ced4da;
+        }
+        
+        .toggle-password:hover {
+            color: var(--primary-color);
+        }
+
+        .btn-login {
+            background-color: var(--primary-color);
+            color: #fff;
+            font-weight: 600;
+            padding: 12px;
+            border-radius: 6px;
+            width: 100%;
+            border: none;
+            transition: all 0.3s;
+        }
+
+        .btn-login:hover {
+            background-color: #0d1117;
+            color: var(--accent-color);
+        }
+
+        .alert-custom {
+            font-size: 0.9rem;
+            padding: 10px;
+            border-radius: 6px;
+        }
+
+        .footer-links {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+
+        .footer-links a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .footer-links a:hover {
+            color: #d69e08;
+            text-decoration: underline;
+        }
+        
+        .back-home {
+            display: block;
+            text-align: center;
+            margin-top: 15px;
+            color: #888;
+            font-size: 0.85rem;
+            text-decoration: none;
+        }
+        .back-home:hover {
+            color: var(--primary-color);
+        }
+
+        .form-label {
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: #6c757d;
+            margin-bottom: 0.3rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="login-card">
+        <a href="../index.php" class="brand-logo">
+            <div class="logo-icon">
+                <i class="fas fa-bolt"></i>
             </div>
+            <div class="logo-text">CHỢ ĐIỆN TỬ</div>
+        </a>
+
+        <h4>Đăng ký tài khoản</h4>
+
+        <?php if ($error_msg): ?>
+            <div class="alert alert-danger alert-custom text-center">
+                <i class="fas fa-exclamation-circle me-1"></i>
+                <?php echo htmlspecialchars($error_msg); ?>
+            </div>
+        <?php endif; ?>
+
+        <form method="post">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">HỌ VÀ TÊN</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-user"></i></span>
+                        <input type="text" name="name" class="form-control" required placeholder="Họ và tên" value="<?php echo isset($name) ? htmlspecialchars($name) : ''; ?>">
+                    </div>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">SỐ ĐIỆN THOẠI</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-phone"></i></span>
+                        <input type="tel" name="phone" class="form-control" placeholder="Số điện thoại" pattern="^[0-9]{10}$" required value="<?php echo isset($phone) ? htmlspecialchars($phone) : ''; ?>">
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">EMAIL</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                    <input type="email" name="email" class="form-control" required placeholder="Email" value="<?php echo isset($email) ? htmlspecialchars($email) : ''; ?>">
+                </div>
+            </div>
+
+          <div class="mb-3">
+                <label class="form-label">MẬT KHẨU</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                    <input type="password" name="password" id="regPass" class="form-control password-field" required minlength="6" placeholder="Nhập mật khẩu">
+                    <span class="input-group-text toggle-password" onclick="togglePassword('regPass', 'iconRegPass')">
+                        <i class="fas fa-eye" id="iconRegPass"></i>
+                    </span>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">NHẬP LẠI MẬT KHẨU</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-check-circle"></i></span>
+                    <input type="password" name="confirm_password" id="confirmPass" class="form-control password-field" required placeholder="Nhập lại mật khẩu">
+                    <span class="input-group-text toggle-password" onclick="togglePassword('confirmPass', 'iconConfirmPass')">
+                        <i class="fas fa-eye" id="iconConfirmPass"></i>
+                    </span>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">KHU VỰC / TỈNH THÀNH</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-map-marker-alt"></i></span>
+                    <select class="form-select" name="location_id" required>
+                        <option value="" disabled <?php echo !isset($location_id) ? 'selected' : ''; ?>>-- Chọn địa điểm --</option>
+                        <?php
+                        if ($result_loc && $result_loc->num_rows > 0) {
+                            while($row = $result_loc->fetch_assoc()) {
+                                // Kiểm tra nếu người dùng đã chọn trước đó (khi submit lỗi) thì giữ nguyên lựa chọn
+                                $selected = (isset($location_id) && $location_id == $row['id']) ? 'selected' : '';
+                                echo '<option value="' . $row['id'] . '" ' . $selected . '>' . $row['province'] . '</option>';
+                            }
+                        } else {
+                            echo '<option value="">Không có dữ liệu</option>';
+                        }
+                        ?>
+                    </select>
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <label class="form-label">GIỚI THIỆU NGẮN (BIO)</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-pen"></i></span>
+                    <textarea class="form-control" name="bio" rows="2" placeholder=""><?php echo isset($bio) ? htmlspecialchars($bio) : ''; ?></textarea>
+                </div>
+            </div>
+
+            <div class="d-grid">
+                <button type="submit" name="create" class="btn btn-login">
+                    ĐĂNG KÝ TÀI KHOẢN
+                </button>
+            </div>
+        </form>
+
+        <div class="footer-links">
+            <p>Đã có tài khoản? <a href="dangnhap.php">Đăng nhập ngay</a></p>
         </div>
+        
+        <a href="../index.php" class="back-home">
+            <i class="fas fa-arrow-left me-1"></i> Quay lại trang chủ
+        </a>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
-</body>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
+    <script>
+        function togglePassword(inputId, iconId) {
+            const input = document.getElementById(inputId);
+            const icon = document.getElementById(iconId);
+            
+            if (input.type === "password") {
+                input.type = "text";
+                icon.classList.remove("fa-eye");
+                icon.classList.add("fa-eye-slash");
+            } else {
+                input.type = "password";
+                icon.classList.remove("fa-eye-slash");
+                icon.classList.add("fa-eye");
+            }
+        }
+    </script>
+</body>
 </html>
